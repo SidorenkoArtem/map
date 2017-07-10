@@ -1,0 +1,342 @@
+
+<html>
+<head>
+    <title>Яndex - index</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link href="../lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../js/jquery.min.js" type="text/javascript"></script>
+    <script src="http://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+</head>
+
+<body>
+
+<div class="container-fluid">
+
+    <div class="row" style="padding-bottom: 2px;">
+        <div class="col-md-2">
+            <h4>ФЭС</h4>
+            <select id="bel_energo_companies2" class="form-control input-sm" style="margin: 1px;">
+                   <option value=""> - ЭС -</option>
+            </select>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <h4>Магистральные линии</h4>
+            <select id="air_lines" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - ЛИНИИ -</option>
+            </select>
+            <button type="button" onclick="show_air_lines(true);" class="btn btn-default btn-sm right" style="margin: 1px;">Показать все</button>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <h4>Воздушные линии</h4>
+            <select id="sectors" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - УЧАСТКИ -</option>
+            </select>
+            <select id="air_lines10" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - ЛИНИИ -</option>
+            </select>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a target="_blank" href="../">Google</a></li>
+                <li><a target="_blank" href="../osmap/osmap.html">Osmap</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id="map" style="height:88%;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+	//
+	ymaps.ready(init);
+	//
+	var myMap;
+	var placemarks;
+	//
+	function init() {
+		// Создаем карту.
+		myMap = new ymaps.Map("map", {center: [52.33, 30.0], zoom: 8}, {searchControlProvider: 'yandex#search'});
+		//
+		placemarks = new ymaps.GeoObjectCollection(null);
+		// myMap.geoObjects.add(placemarks);
+		//
+		myMap.events.add('boundschange', function (e) {
+			//
+			if ((myMap.getZoom() >= 15) && !placemarks.getMap()) {
+				myMap.geoObjects.add(placemarks);
+			}
+			else if ((myMap.getZoom() < 15) && placemarks.getMap()) {
+				myMap.geoObjects.remove(placemarks);
+			}
+		});
+	}
+	//
+	//
+	var LEP = {};
+	// APP_data = {lines:{},substations:{}};
+	//
+	function addLEP(item) {
+		if (LEP[item.idLine] == undefined) {
+			LEP[item.idLine] = item;
+		}
+	}
+	//
+	function addLine(item, color) {
+		var myPolyline = new ymaps.Polyline([[item.latitude1, item.longitude1], [item.latitude2, item.longitude2]],
+			{
+				hintContent: item.name,
+				balloonContent: "ID объекта: " + item.id + "<h4>Линия " + LEP[item.idLine].name + "</h4>Координаты: " + item.latitude1 + " x " + item.longitude1
+				+ "<br>Длина: " + getDistance([item.latitude1, item.longitude1], [item.latitude2, item.longitude2])
+			},
+			{
+				strokeColor: "#" + color,
+				strokeWidth: 2,
+				strokeOpacity: 0.7
+			});
+		myMap.geoObjects.add(myPolyline);
+	}
+	//
+	function addPlacemark(item, preset) {
+		var placemark = new ymaps.Placemark([item.latitude1, item.longitude1],
+			{
+				iconContent: item.name,
+				hintContent: item.name,
+				balloonContent: "ID объекта: " + item.id + "<h4>Линия " + LEP[item.idLine].name + "</h4><h4>Опора " + item.name + "</h4>Координаты: " + item.latitude1 + " x " + item.longitude1
+			},
+			{
+				preset: preset ? preset : "islands#redIcon"
+			}
+		);
+		//
+		placemark.events.add("click", function (e) {
+			get_media_urls(item.id, placemark.properties);
+		});
+		//
+		placemarks.add(placemark);
+	}
+	//
+	function addSubstation(item) {
+		var rectangle = new ymaps.Rectangle(
+			[[item.latitude1, item.longitude1], [item.latitude2, item.longitude2]],
+			{
+				hintContent: item.name,
+				balloonContent: "ID объекта: " + item.id + "<h4>Линия" + LEP[item.idLine].name + "</h4><h4>Подстанция " + item.name + "</h4>Координаты: " + item.latitude1 + " x " + item.longitude1
+			},
+			{
+				fillColor: '#7df9ff33',
+				fillOpacity: 0.5,
+				strokeColor: '#0000FF',
+				strokeOpacity: 0.5,
+				strokeWidth: 2,
+				borderRadius: 5
+			}
+		);
+		//
+		rectangle.events.add("click", function (e) { get_media_urls(item.id, rectangle.properties); });
+		//
+		myMap.geoObjects.add(rectangle);
+	}
+	//
+	// ФЭС
+	//
+	function get_bel_energo_companies() {
+		$.ajax({url: "../bel_energo_companies", method: "GET", dataType: "json"})
+			.done(function (data) {
+				if (data) { $.each(data, function (i, item) { $('#bel_energo_companies').append($('<option>', {value: item.id, text: item.name})); }); }
+			});
+	}
+	//
+	get_bel_energo_companies();
+	//
+	$('#bel_energo_companies').on("change", function () {
+		var codes = $('#bel_energo_companies').val();
+		if (codes) {
+			get_air_lines(codes);
+			get_sectors(codes);
+		}
+	});
+	//
+	// Магистральные линии
+	//
+	function get_air_lines(codes) {
+		$.ajax({url: "../air_lines", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+			.done(function (data) {
+				if (data) {
+					$('#air_lines').empty().append($('<option>', {value: "", text: " - ЛИНИИ - "}));
+					//
+					$.each(data, function (i, item) {
+						$('#air_lines').append($('<option>', {value: item.id, text: item.name}));
+					});
+				}
+			});
+	}
+	//
+	$('#air_lines').on("change", function () {show_air_lines();});
+	//
+	function show_air_lines(showall) {
+		var codes = "";
+		if (showall) {
+			$("#air_lines").find("> option").each(function () {if (this.value) {codes += "," + this.value}});
+			codes = codes.substring(1);
+		}
+		else {
+			codes = $('#air_lines').val()
+		}
+		//
+		if (codes) {get_coords_trunklines(codes);}
+		else {alert("Пожалуйста выберите чего-нибудь ...");}
+	}
+	//
+	function get_coords_trunklines(codes) {
+		$.ajax({url: "../coords_trunklines", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+			.done(function (data) {
+				if (data) {
+					var panArray = [];
+					//
+					$.each(data, function (i, item) {
+						if (item.code == "1" || item.code == "216" || item.code == "217" || item.code == "218" || item.code == "219" || item.code == "230" || item.code == "231" || item.code == "239") {
+							addLEP(item);
+							panArray.push([item.latitude1, item.longitude1], [item.latitude2, item.longitude2]);
+						}
+						else if (item.code == "85" || item.code == "86" || item.code == "220" || item.code == "235" || item.code == "236") {
+							addPlacemark(item);
+						}
+						else if (item.code == "108" || item.code == "148") {
+							addSubstation(item);
+						}
+						else {
+							addLine(item, "ff0000");
+						}
+					});
+					//
+					myMap.setBounds(panArray);
+				}
+			});
+	}
+	//
+	// Воздушные линии
+	//
+	function get_sectors(codes) {
+		$.ajax({url: "../sectors", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+			.done(function (data) {
+				if (data) {
+					$('#sectors').empty().append($('<option>', {value: "", text: " - УЧАСТКИ - "}));
+					//
+					$.each(data, function (i, item) {
+						$('#sectors').append($('<option>', {value: item.id, text: item.name}));
+					});
+				}
+			});
+	}
+	//
+	$('#sectors').on("change", function () {
+		var codes = $('#sectors').val();
+		if (codes) {
+			get_air_lines10(codes);
+		}
+	});
+	//
+	function get_air_lines10(codes) {
+		$.ajax({url: "../air_lines10", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+			.done(function (data) {
+				if (data) {
+					$('#air_lines10').empty().append($('<option>', {value: "", text: " - ЛИНИИ - "}));
+					//
+					$.each(data, function (i, item) {
+						$('#air_lines10').append($('<option>', {value: item.id, text: item.name}));
+					});
+				}
+			});
+	}
+	//
+	$('#air_lines10').on("change", function () {
+		var codes = $('#air_lines10').val();
+		if (codes) {
+			$.ajax({url: "../coords_airlines10", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+				.done(function (data) {
+					if (data) {
+						var panArray = [];
+						//
+						$.each(data, function (i, item) {
+							if (item.code == "85" || item.code == "86" || item.code == "220" || item.code == "235" || item.code == "236") {
+								addPlacemark(item, "islands#BlueIcon");
+							}
+							else if (item.code == "1" || item.code == "216" || item.code == "217" || item.code == "218" || item.code == "219" || item.code == "230" || item.code == "231" || item.code == "239") {
+								addLEP(item);
+								panArray.push([item.latitude1, item.longitude1], [item.latitude2, item.longitude2]);
+							}
+							else if (item.code == "108" || item.code == "148") {
+								addSubstation(item);
+							}
+							else {
+								addLine(item, "0000ff");
+							}
+						});
+						//
+						myMap.setBounds(panArray);
+					}
+				});
+		}
+	});
+	//
+	function get_media_urls(id, pp) {
+		if (pp.get('dataloaded') != true) {
+			$.ajax({url: "../pillar/check_data", type: "POST", dataType: "json", data: "[" + id + "]", contentType: 'application/json', mimeType: 'application/json'})
+				.done(function (series) {
+					if (series.length > 0) {
+						var balloonContent = pp.get("balloonContent");
+						var json_ob = series[0].dataExistence;
+						if (json_ob != undefined) {
+							for (var key in json_ob) {
+								if (json_ob[key] != "")
+									switch (key.substr(0, 5)) {
+										case "voice":
+											balloonContent += "<audio  controls><source src='../" + json_ob[key].substr(1) + ".wav' type=\"audio/wav\"></audio><br><br>";
+											break;
+										case "photo":
+											balloonContent += "<img src=\"../" + json_ob[key].substr(1) + ".jpeg\" width=\"400\"><br><br>";
+											break;
+										case "video":
+											balloonContent += "<video controls  width=\"300\" height=\"200\">	<source src='../" + json_ob[key].substr(1) + ".avi' type='video/avi' /></video><br><br>";
+										case "schem":
+											balloonContent += "<a href='../" + json_ob[key].substr(1) + ".vsd'>Схема </a><br><br>";
+									}
+							}
+							pp.set('balloonContent', balloonContent);
+							pp.set('dataloaded', true);
+						}
+					}
+				});
+		}
+	}
+	//
+	var rad = function (x) {return x * Math.PI / 180;};
+
+	var getDistance = function (p1, p2) {
+		var R = 6378137;	// Earth’s mean radius in metervar
+		var dLat = rad(p2[0] - p1[0]);
+		var dLong = rad(p2[1] - p1[1]);
+		var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(rad(p1[0])) * Math.cos(rad(p2[0])) * Math.sin(dLong / 2) * Math.sin(dLong / 2);
+		var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		var d = R * c;
+		return d.toFixed(2);// returns the distance in meter
+	};
+
+
+</script>
+
+</body>
+</html>

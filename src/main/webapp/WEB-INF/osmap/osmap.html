@@ -1,0 +1,266 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../css/leaflet.css" />
+    <link href="../lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <!--[if lte IE 8]><link rel="stylesheet" href="http://leaflet.cloudmade.com/dist/leaflet.ie.css" /><![endif]-->
+    <script src="../js/leaflet.js"></script>
+    <script src="../js/jquery.min.js"></script>
+</head>
+
+<body>
+<div class="container-fluid">
+
+    <div class="row" style="padding-bottom: 2px;">
+        <div class="col-md-2">
+            <h4>ФЭС</h4>
+            <select id="bel_energo_companies" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - ЭС -</option>
+            </select>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <h4>Магистральные линии</h4>
+            <select id="air_lines" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - ЛИНИИ -</option>
+            </select>
+            <button type="button" onclick="show_air_lines(true);" class="btn btn-default btn-sm right" style="margin: 1px;">Показать все</button>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <h4>Воздушные линии</h4>
+            <select id="sectors" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - УЧАСТКИ -</option>
+            </select>
+            <select id="air_lines10" class="form-control input-sm" style="margin: 1px;">
+                <option value=""> - ЛИНИИ -</option>
+            </select>
+        </div>
+
+        <div class="col-md-1"></div>
+
+        <div class="col-md-2">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a target="_blank" href="../">Google</a></li>
+                <li><a target="_blank" href="../yandex/index.html">Yandex</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div id="map" style="height:88%;"></div>
+        </div>
+    </div>
+</div>
+
+    <script src="../js/lines.js"></script>
+    <script>
+    var list_air=",";
+    var list_air10=",";
+    var link_to_img='../img/lep.jpg';
+var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            osmAttribution = 'Map data <a target="_blank" href="http://www.openstreetmap.org">OpenStreetMap.org</a>; contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            osmLayer = new L.TileLayer(osmUrl, {maxZoom: 19, attribution: osmAttribution});
+                var map = new L.Map('map', {center: new L.LatLng(52.413354, 31.006106), zoom: 17, layers: [osmLayer]});
+                var baseMaps = {
+                        "OpenStreetMap": osmLayer
+                        };
+                layersControl = new L.Control.Layers(baseMaps);
+                map.addControl(layersControl);
+    map.on('click', onMapClick);
+    var popup = new L.Popup();
+    function onMapClick(e) {
+    var latlngStr = '(' + e.latlng.lat.toFixed(6) + ', ' + e.latlng.lng.toFixed(6) + ')';
+        popup.setLatLng(e.latlng);
+        popup.setContent("Координаты точки " + latlngStr);
+        map.openPopup(popup);
+    }
+    
+    var myIcon = L.icon({
+        iconUrl: link_to_img,
+        iconSize: [22, 29],
+        iconAnchor: [11, 20],
+        popupAnchor: [0, 0],
+    });
+
+    map.on('zoomend', function(e) {
+		var img = document.getElementsByTagName("img");
+    	if (map.getZoom() >= 15) {
+			for (var i=0;i<img.length;i++)
+			{
+				if (img[i].getAttribute("src")==link_to_img){
+					img[i].style.width=22;
+					img[i].style.height=29;
+				}
+			}
+    	}
+    	else {
+			for (var i=0;i<img.length;i++)
+			{
+				if (img[i].getAttribute("src")==link_to_img){
+					img[i].style.width=0;
+					img[i].style.height=0;
+				}
+			}
+    	}
+    	});
+    
+	//
+	function get_coords_trunklines(type,codes) {
+		var urls="";
+		if (type=="air")
+			{
+				if (list_air.indexOf(codes)>0)
+				{
+					alert("Такая линия уже отображена на карте");
+					//return;
+				}
+				else
+				{
+					list_air=list_air+codes+",";
+				}	
+				urls="../coords_trunklines";
+			}
+			
+		else
+			if (type=="air10" )
+				{
+				if (list_air10.indexOf(codes)>0)
+				{
+					alert("Такая линия уже отображена на карте");
+					//return;
+				}
+				else
+				{
+					list_air10=list_air10+codes+",";
+				}	
+					urls="../coords_airlines10";
+				}
+			else 
+				return;
+		var latitude1=360;
+		var	longitude1=360;
+		var latitude2=-360;
+		var longitude2=-360;
+		$.ajax({url: urls, method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
+			.done(function (data) {
+				if (data) {
+//					console.log("coords_trunklines");
+//					console.log(data);
+					//
+					var linename="";
+					$.each(data, function (i, item) {
+						if (item.code == "85" || item.code == "86" || item.code == "220" || item.code == "235" || item.code == "236") {
+							addMarker(linename,item);
+						}
+						else if (item.code == "1" || item.code == "216" || item.code == "217" || item.code == "218" || item.code == "219" || item.code == "230" || item.code == "231" || item.code == "239") {
+//							L.Map('map', {center: new L.LatLng((item.latitude1+item.latitude2)/2, (item.longitude1+item.longitude2)/2), zoom: 14, layers: [osmLayer]});
+							if (latitude1>item.latitude1)
+								latitude1=item.latitude1;
+							if (longitude1>item.longitude1)
+								longitude1=item.longitude1;
+							if (latitude2<item.latitude2)
+								latitude2=item.latitude2;
+							if (longitude2<item.longitude2)
+								longitude2=item.longitude2;
+							linename="Линия:<b>"+item.name+"</b>";
+							if (type=="air"){
+								linename="ФЭС: "+$('#bel_energo_companies :selected').text()+"<br>"+linename;
+							}
+							else{
+								linename="ФЭС: "+$('#bel_energo_companies :selected').text()+"<br>Участок: "+$('#sectors :selected').text()+"<br>"+linename;
+							}
+						}
+						else  if (item.code == "108" || item.code == "148") {
+							var bounds = [[item.latitude1, item.longitude1], [item.latitude2, item.longitude2]];
+							L.rectangle(bounds, {color: "#ff7800", weight: 1}).addTo(map).bindPopup("<b>Подстанция: "+item.name+"</b><br><a href='../substantion_scheme/"+item.id+"'>Схема подстанции</a>");
+							}
+						else {
+							addPolyline(linename,item);
+							}
+							
+					});
+				var latlngs = [
+								[latitude1, longitude1], [latitude2, longitude2]
+									];
+					map.fitBounds(latlngs);
+
+				}
+			});
+	}
+
+	function addMarker(linename,item){	
+		var textMarker = linename+"<br><b>Опора "+item.name+"</b><br><br>Координаты: " + item.latitude1 + " x " + item.longitude1 + "<div id='media'></div>";
+		var marker = L.marker([item.latitude1, item.longitude1], {icon: myIcon,alt:item.name,title:item.name}).addTo(map).bindPopup(textMarker); 
+		
+		marker.on("click", function (e) {
+			get_media_urls(item.id);
+		});
+	}
+	
+	function addPolyline(linename,item){
+		var latlngs = [
+						[item.latitude1, item.longitude1], [item.latitude2, item.longitude2]
+						];
+					var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map).bindPopup(""+linename+"<br><br>Координаты пролета:<br>" +
+						 item.latitude1 + " x " + item.longitude1+" -<br>" + item.latitude2 + " x " + item.longitude2 + "<div id='prlen'></div>");
+
+					polyline.on("click",function(e){
+						$("#prlen").html("<br>Длина: "+ getDistance ([item.latitude1, item.longitude1],[item.latitude2, item.longitude2]) + " м.");
+						});
+
+					
+	}
+
+
+	function get_media_urls(id){  
+		$.ajax({
+			url: "../pillar/check_data",
+			type: "POST",    //"GET", "POST"
+			dataType: "json",
+			data: "[" + id + "]",
+			contentType: 'application/json',
+			mimeType: 'application/json',
+			error: function (xhr, status, err) {
+				alert(err);
+				console.log(err);
+			},
+			success: onReceived
+		});
+	}
+
+	function onReceived(series) {
+		if (series.length == 0){
+		$("#media").html("");
+		return;}
+			var divContent="";
+			var json_ob = series[0].dataExistence;
+			if (json_ob != undefined) {
+				for (var key in json_ob) {
+					if (json_ob[key] != "")
+						switch (key.substr(0, 5)) {
+							case "voice":
+								divContent += "<audio  controls><source src='../" + json_ob[key].substr(1) + ".wav' type=\"audio/wav\"></audio><br><br>";
+								break;
+							case "photo":
+								divContent += "<img src=\"../" + json_ob[key].substr(1) + ".jpeg\" width=\"400\"><br><br>";
+								break;
+							case "video":
+								divContent += "<video controls  width=\"300\" height=\"200\"><source src='../" + json_ob[key].substr(1) + ".avi' type='video/avi' /></video><br><br>";
+							case "schem":
+								divContent += "<a href='../" + json_ob[key].substr(1) + ".vsd'>Схема опоры</a><br><br>";
+						}
+				}
+				$("#media").html(divContent);
+			}
+		}
+	
+
+    </script>
+  </body>
+</html>
