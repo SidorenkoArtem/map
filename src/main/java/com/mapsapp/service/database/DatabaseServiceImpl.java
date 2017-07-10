@@ -21,7 +21,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 		List<BelEnergoCompany> companies = new ArrayList<>();
 
 		try {
-			// (Connection connection = dataSource.getConnection();12341
+			// (Connection connection = dataSource.getConnection();12341 
 			// Statement statement = connection.createStatement();) {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			//Connection connection = DriverManager
