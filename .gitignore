@@ -1,0 +1,10 @@
+# folder target
+target/
+src/main/resources
+.settings/
+.classpath
+.project
+pom.xml
+build.bat
+
+# txt-files target/*.txt
