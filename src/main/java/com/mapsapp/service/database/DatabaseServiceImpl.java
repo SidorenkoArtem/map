@@ -25,7 +25,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 			// Statement statement = connection.createStatement();) {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			//Connection connection = DriverManager
-					//.getConnection("jdbc:sqlserver://192.168.51.161:1433;databaseName=gis_db", "sa", "123");
+					//.getConnection("jdbc:sqlserver://192.168.51.161:1433;databaseName=gis_db", "sa", "123"); 
 			Connection connection = DriverManager
 			  .getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
 			Statement statement = connection.createStatement();
