@@ -1,0 +1,13 @@
+com\mapsapp\controller\PillarController.class
+com\mapsapp\domain\Substation.class
+com\mapsapp\service\database\DatabaseServiceImpl.class
+com\mapsapp\domain\BelEnergoCompany.class
+com\mapsapp\domain\ErrorFile.class
+com\mapsapp\controller\HelloContoller.class
+com\mapsapp\domain\AirLine10.class
+com\mapsapp\domain\Coordinates.class
+com\mapsapp\domain\DataAvailability.class
+com\mapsapp\domain\DistrictPowerStation.class
+com\mapsapp\domain\Sector.class
+com\mapsapp\service\database\DatabaseService.class
+com\mapsapp\domain\AirLine.class
