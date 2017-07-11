@@ -15,6 +15,7 @@
 <link href="css/my_bootstrap.css" rel="stylesheet">
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script src="js/calendar_ru.js" type="text/javascript"></script>
+<script src="markerClusterer.js"></script>
 
 <style type="text/css">
 html {
@@ -257,6 +258,8 @@ body {
 			                              offset: (100/(lengthWay/val))*i + '%'};
 		            	  masArrows.push(s);
 		                }
+					    if (flightPath)
+					      flightPath.setMap(null);
 						flightPath = new google.maps.Polyline({
 							  path: coordinatesAllWay,
 							  geodesic: true,
@@ -286,6 +289,8 @@ body {
 		//Средство передвижения
 		//
 		function get_vehicles(codes){
+			var markers = [];
+			var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			mode = 0;
 			removeWayVehicle();
 			removeVehicles();
@@ -304,19 +309,23 @@ body {
 							});
 						var uluru = {lat: item.lastPositionY, lng: item.lastPositionX};
 						
-						
 						var markerPosition = new google.maps.LatLng(item.lastPositionY, item.lastPositionX);
 						markersBounds.extend(markerPosition); 
 				        var marker = new google.maps.Marker({
 				            position: uluru,
 				            map: map,
-				            icon :  {url: "img/car.jpg",
-				            	scaledSize: new google.maps.Size(40, 50)}
+				            icon :  {url: "img/car.png",
+				            	scaledSize: new google.maps.Size(35, 50)},
+				            label: labels[1% labels.length] 
 				          });
+				        markers.push(marker);// = marker;
 				        marker.addListener('click', function(){infoWindow.open(map, marker);});
 				        markerVehiclesList.push(marker);
 					});
 					}
+				//var markerCluster = new MarkerClusterer(map, markers,
+			     //       {url : "img/car.png"});
+
 				map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds)); 
 			});
 		}
