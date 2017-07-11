@@ -1,4 +1,5 @@
 # folder target
 
-
 # txt-files target/*.txt
+
+target/

@@ -1,0 +1,50 @@
+/* 
+ќформление панели выбора линий, автомобилей
+ */
+
+#navbar_lin_avt { 
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+        border: 2px solid #dbdbdb;
+        border-radius:5px;
+        width: 210px;
+        text-align: center;
+        background-color: #2d6ca2;
+      }
+#navbar_lin_avt li { display: inline; }
+#navbar_lin_avt a {
+		color: #fff;
+		padding: 5px 5px;
+		text-decoration: none;
+		font-weight: bold;
+		display: inline-block;
+		width: 80px;
+	  }
+#navbar_lin_avt a:hover {
+		border-radius: 25px;
+		background-color: #C1C7DC;
+	  }
+#navbar_lin_avt a.active { 
+		border-radius: 25px;
+		background-color: #C1C7DC; 
+	  }
+#navbar_lin_avt a:focus { 
+	    border-radius: 25px;
+		background-color: #C1C7DC; 
+	  }
+#hidden_element { /*скрывает элементы*/
+		visibility: hidden; 
+		position:absolute;  
+		left:20px; 
+		top:200px;
+		width:200px;
+	  }
+#distance_way {  /* настройка кнопки пройденный путь*/
+		position:absolute; 
+		z-index: 1;
+		left:15px; 
+		top:360px;
+		width:200px;
+	  }
+	 
