@@ -13,9 +13,12 @@
 <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <link href="css/bootstrap-theme.min.css" rel="stylesheet">
 <link href="css/my_bootstrap.css" rel="stylesheet">
+<link rel="stylesheet" href="css/my_navbar.css" ><!-- оформление кнопочек Линии и Авто -->
 <script type="text/javascript" src="js/jquery.min.js"></script>
-<script src="js/calendar_ru.js" type="text/javascript"></script>
+<script type="text/javascript" src="js/hidden_element.js"></script><!-- делает элементы невидимыми -->
 <script src="markerClusterer.js"></script>
+<script type="text/javascript" src="js/calendar.js"></script><!-- календарь  -->
+<script type="text/javascript" src="js/date_today.js"></script><!-- сегодняшняя дата в input -->
 
 <style type="text/css">
 html {
@@ -67,7 +70,34 @@ body {
 				&nbsp; Карта электросетей <span
 					style="float: right; cursor: pointer;"
 					class="glyphicon glyphicon-erase" title="Очистить карту"></span>
+			<br>
+			<br>
+				
+			<ul id="navbar_lin_avt">	
+				<a href="javascript:void(0);" onClick="openLayer(div1); ">Линии</a>
+				<a href="javascript:void(0);" onClick="openLayer(div2);">Авто</a>
+        	</ul>	
+        	
+        	 <div id="distance_way">
+        		<div>
+					<input id="way" type="button" onclick="get_way()" value="Путь в период"  style="width:200px;height:25px;">
+				</div> 
+				<br>
+			<div>
+			<form  style="z-index:9;" action="">
+				<p style="font-size:14px;">
+				с <input style="width: 80px;"   type="data" name="calend" id="today1" onfocus="this.select();_Calendar.lcs(this)"
+    			onclick="event.cancelBubble=true;this.select();_Calendar.lcs(this)">
+				по <input style="width: 80px;" type="data" name="calend" id="today2" onfocus="this.select();_Calendar.lcs(this)"
+    			onclick="event.cancelBubble=true;this.select();_Calendar.lcs(this)">
+				</p>
+			</form>
+			</div>
+			</div>
+		
+        	<div id="hidden_element"> <!-- from my_navbar.css -->	
 			</h4>
+			<div id="div1">  <!--from hidden_element.js-->
 			<select id="bel_energo_companies" class="form-control input-sm"
 				style="margin: 1px;">
 				<option value="bel_energo_companies">- ЭС -</option>
@@ -89,15 +119,18 @@ body {
 			<div class="panel">
 				<div class="panel-heading">ВЛ 10кВ</div>
 				<div class="panel-body checkbox" id="air_lines10"></div>
-			</div>
+			</div></div></div>
 			<!--select id="air_lines10" class="form-control input-sm">
 			<option value="" selected> </option>
 		</select-->
+			<div id="hidden_element">
+			<div  id="div2"> <!--from hidden_element.js-->
 			<h5></h5>
 			<select id="bel_energo_companies2" class="form-control input-sm"
 				style="margin: 1px;">
 				<option value="">-ФЭС-</option>
-			</select> <select id="vehicles" class="form-control input-sm"
+			</select><br> 
+			<select id="vehicles" class="form-control input-sm"
 				style="margin: 1px;">
 				<option value="">-Машины-</option>
 			</select>
@@ -105,21 +138,11 @@ body {
 				<div id="marks" style=""></div>
 				<div id="lines" style=""></div>
 				<div id="zoom" style=""></div>
-			</div>
+			</div></div>
 			<div>
 				<input id="way" type="button" onclick="get_way()" value="Way"
 					style="width: 200px; height: 25px">
 			</div>
-			<div>
-				<form action="">
-					<p>
-						<input id="calendar" type="text" value="dd-mm-yy"
-							onfocus="this.select();lcs(this)"
-							onclick="event.cancelBubble=true;this.select();lcs(this)">
-					</p>
-				</form>
-			</div>
-
 		</div>
 		<div class="col-md-10" style="height: 100%; padding-top: 5px;">
 			<div id="map_canvas"></div>
@@ -214,7 +237,7 @@ body {
 			markersBounds = new google.maps.LatLngBounds();
 			coordinatesAllWay = [];
 			var codes = $('#vehicles').val();
-			var date = document.getElementById('calendar').value;
+			var date = document.getElementById('today1').value;
 			if (codes) {
 				$.ajax({
 					url: "coordinatesVehicles",
