@@ -15,17 +15,15 @@ import java.util.List;
 public class DatabaseServiceImpl implements DatabaseService {
 	@Autowired
 	private DataSource dataSource;
+	@Autowired
+	private DataSource dataSource1;
 
 	@Override
 	public List<BelEnergoCompany> getAllBelEnergoCompanies() {
 		List<BelEnergoCompany> companies = new ArrayList<>();
 
 		try {
-			// (Connection connection = dataSource.getConnection();12341 
-			// Statement statement = connection.createStatement();) {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			//Connection connection = DriverManager
-					//.getConnection("jdbc:sqlserver://192.168.51.161:1433;databaseName=gis_db", "sa", "123"); 
 			Connection connection = DriverManager
 			  .getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
 			Statement statement = connection.createStatement();
@@ -88,7 +86,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 		if (codes == null) {
 		  return coordinates;
 		}
-		try {
+		/*try {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
 			Connection connection = DriverManager
 					.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
@@ -97,6 +95,14 @@ public class DatabaseServiceImpl implements DatabaseService {
 			String s = dates.replace('-', '.');
 			ResultSet resultSet = statement.executeQuery("Select timestamp, x, y from position " 
 			+ " where (vehicle_id = " + in + ") and convert(varchar, timestamp, 104) = '"+
+					s + "' order by timestamp");*/
+		try (Connection connection = dataSource.getConnection();
+		     Statement statement = connection.createStatement();) 
+		{
+			String in = conversion(codes);
+			String s = dates.replace('-', '.');
+			ResultSet resultSet = statement.executeQuery("Select timestamp, x, y from position " 
+			+ " where (vehicle_id = " + in + ") and convert(varchar, timestamp, 104) = '" +
 					s + "' order by timestamp");
 			Time prevDate = null;
 			while (resultSet.next()) {

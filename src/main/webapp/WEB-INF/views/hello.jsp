@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="css/my_navbar.css" ><!-- оформление кнопочек Линии и Авто -->
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/hidden_element.js"></script><!-- делает элементы невидимыми -->
-<script src="markerClusterer.js"></script>
+<script type="text/javascript" src="js/markerclusterer.js"></script>
 <script type="text/javascript" src="js/calendar.js"></script><!-- календарь  -->
 <script type="text/javascript" src="js/date_today.js"></script><!-- сегодняшняя дата в input -->
 
@@ -128,7 +128,7 @@ body {
 			<h5></h5>
 			<select id="bel_energo_companies2" class="form-control input-sm"
 				style="margin: 1px;">
-				<option value="">-ФЭС-</option>
+				<option value="">-Предприятия электросетей-</option>
 			</select><br> 
 			<select id="vehicles" class="form-control input-sm"
 				style="margin: 1px;">
@@ -246,8 +246,8 @@ body {
 				})
 				.done(function (data){
 					$.each(data, function (i, item){
-						if (item.date)
-						  $('#bel_energo_companies').append($('<option>', {text: item.date}));
+						//if (item.date)
+						//  $('#bel_energo_companies').append($('<option>', {text: item.date}));
 						coordinatesAllWay.push({lat: item.latitude, lng: item.longitude});
 					    if (prevLat && prevLng)	{
 						    lengthWay = lengthWay + latlng2distance(item.latitude, 
@@ -261,6 +261,12 @@ body {
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
 					});
+					var marker = new google.maps.Marker({
+			            position: coordinatesAllWay[coordinatesAllWay.length-1],
+			            map: map,
+			            icon :  {url: "img/car.png",
+			            	scaledSize: new google.maps.Size(35, 50)}
+			          });
 					if (coordinatesAllWay.length != 0){
 						if (mode!=1)
 						  map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds));
@@ -338,16 +344,15 @@ body {
 				            position: uluru,
 				            map: map,
 				            icon :  {url: "img/car.png",
-				            	scaledSize: new google.maps.Size(35, 50)},
-				            label: labels[1% labels.length] 
+				            	scaledSize: new google.maps.Size(35, 50)}
 				          });
 				        markers.push(marker);// = marker;
 				        marker.addListener('click', function(){infoWindow.open(map, marker);});
 				        markerVehiclesList.push(marker);
 					});
 					}
-				//var markerCluster = new MarkerClusterer(map, markers,
-			     //       {url : "img/car.png"});
+				
+				//var markerCluster = new MarkerClusterer(map, markers, {imagePath: "img/cluster/m"});
 
 				map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds)); 
 			});
@@ -368,7 +373,7 @@ body {
 			if (codes) {
 				get_spr_data("air_lines", codes);
 				get_sectors(codes);
-			}
+			} 
 		});
 
 												// Участки
