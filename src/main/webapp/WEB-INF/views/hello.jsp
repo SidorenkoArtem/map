@@ -167,9 +167,10 @@ body {
 		
 		var markerVehiclesList = [];
 		var coordinatesAllWay = [];
+		var pointsOnWay = [];
 		var flightPath;
         var markersBounds;
-        var mode = 0;
+        
         
         const is_zoom = [[8, 102400], [9, 51200], [10, 25600], [11, 12800], [12, 6400], 
                          [13,3200], [14, 1600], [15, 800], [16, 400], [17, 200], [18, 100], 
@@ -230,8 +231,14 @@ body {
 	    }
 		
 		function get_way(){
+			mode=0;
+			drowWay();
+		}
+		
+		function drowWay(){
 			var prevLat, prevLng;
 			var lengthWay = 0;
+			removePointsOnWay();
 			removeVehicles();
 			removeWayVehicle();
 			markersBounds = new google.maps.LatLngBounds();
@@ -258,6 +265,25 @@ body {
 						    prevLat = item.latitude;
 						    prevLng = item.longitude;
 					    }
+					   if (i%10 == 0){
+					    	/*var pointMarker = new google.maps.Marker({
+					    			position : {lat: item.latitude, lng: item.longitude},
+					    			map: map,
+					    			icon :  {url: "img/cluster/m1.png",
+						            	scaledSize: new google.maps.Size(20, 20)}
+					    	});*/
+					    	var circle = new google.maps.Circle({
+					    	      strokeColor: '#FF0000',
+					    	      strokeOpacity: 0.8,
+					    	      strokeWeight: 2,
+					    	      fillColor: '#FF0000',
+					    	      fillOpacity: 0.35,
+					    	      center: {lat: item.latitude, lng: item.longitude},
+					    		  map : map,
+					    		  radius: 0.3
+					    	});
+					    	//pointsOnWay.push(pointMarker);
+					    }
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
 					});
@@ -267,6 +293,7 @@ body {
 			            icon :  {url: "img/car.png",
 			            	scaledSize: new google.maps.Size(35, 50)}
 			          });
+					pointsOnWay.push(marker);
 					if (coordinatesAllWay.length != 0){
 						if (mode!=1)
 						  map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds));
@@ -314,6 +341,12 @@ body {
 	              for (i in markerVehiclesList)
 	            	  markerVehiclesList[i].setMap(null);
 	    }
+	    
+	    function removePointsOnWay(){
+	    	if (pointsOnWay)
+	    		for (i in pointsOnWay)
+	    			pointsOnWay[i].setMap(null);
+	    }
 		//
 		//Средство передвижения
 		//
@@ -321,6 +354,7 @@ body {
 			var markers = [];
 			var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			mode = 0;
+			removePointsOnWay();
 			removeWayVehicle();
 			removeVehicles();
 			markersBounds = new google.maps.LatLngBounds();
@@ -351,7 +385,6 @@ body {
 				        markerVehiclesList.push(marker);
 					});
 					}
-				
 				//var markerCluster = new MarkerClusterer(map, markers, {imagePath: "img/cluster/m"});
 
 				map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds)); 
@@ -976,7 +1009,7 @@ function YandexProjection() {
 
 			document.getElementById("zoom").innerHTML = "Увеличение: " + map.getZoom();
 			if (mode == 1){
-				get_way();
+				drowWay();
 			}
 			if( map.getZoom() > main_zoom && !painted){
 
