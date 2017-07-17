@@ -10,6 +10,9 @@ public class VehicleCoordinate {
 	private double longitude;	
 	private Date date;
 	private Time time;
+	private long waitTime;
+	private boolean FirstPoint;
+	private int stat;
 
 	public VehicleCoordinate(){
 	}
@@ -53,4 +56,35 @@ public class VehicleCoordinate {
 	public void setTime(Time time) {
 		this.time = time;
 	}
+
+	public boolean isFirstPoint() {
+		return FirstPoint;
+	}
+
+	public void setFirstPoint(boolean firstPoint) {
+		FirstPoint = firstPoint;
+	}
+
+	public int getStat() {
+		return stat;
+	}
+
+	public void setStat(int stat) {
+		this.stat = stat;
+	}
+
+	public long getWaitTime() {
+		return waitTime;
+	}
+
+	public void setWaitTime(long waitTime) {
+		this.waitTime = waitTime;
+	}
+
+	@Override
+	public String toString() {
+		return "VehicleCoordinate [id=" + id + ", latitude=" + latitude + ", longitude=" + longitude + ", date=" + date
+				+ ", time=" + time + ", waitTime=" + waitTime + ", FirstPoint=" + FirstPoint + ", stat=" + stat + "]";
+	}
+	
 }

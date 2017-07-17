@@ -24,8 +24,8 @@ public class DatabaseServiceImpl implements DatabaseService {
 
 		try {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager
-			  .getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
+					"sa", "123");
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("Select id, name from company");
 			while (resultSet.next()) {
@@ -44,12 +44,12 @@ public class DatabaseServiceImpl implements DatabaseService {
 	public List<Vehicle> getVehicleByCodes(long[] codes) {
 		List<Vehicle> vehicles = new ArrayList<>();
 		if (codes == null)
-		  return vehicles;
+			return vehicles;
 
 		try {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager
-					.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
+					"sa", "123");
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
 			ResultSet resultSet = statement.executeQuery("Select id, model, last_position.x, "
@@ -84,39 +84,80 @@ public class DatabaseServiceImpl implements DatabaseService {
 	public List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes, String dates) {
 		List<VehicleCoordinate> coordinates = new ArrayList<>();
 		if (codes == null) {
-		  return coordinates;
+			return coordinates;
 		}
+		boolean isWait = false;
 		try {
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager
-					.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
+					"sa", "123");
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
 			String s = dates.replace('-', '.');
-			ResultSet resultSet = statement.executeQuery("Select timestamp, x, y from position " 
-			+ " where (vehicle_id = " + in + ") and convert(varchar, timestamp, 104) = '"+
-					s + "' order by timestamp");
-			Time prevDate = null;
+			ResultSet resultSet = statement
+					.executeQuery("Select timestamp, x, y from position " + " where (vehicle_id = " + in
+							+ ") and convert(varchar, timestamp, 104) = '" + s + "' order by timestamp");
+			// Time prevDate = null;
+			Time prevTime = null;
+			VehicleCoordinate prevVehicleCoordinate = null;
 			while (resultSet.next()) {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
-				System.out.println(resultSet.getTime(1));
-				if (prevDate!=null){
-					System.out.println(prevDate.getTime() - resultSet.getTime(1).getTime());
-					//if ((prevDate.getTime() - resultSet.getTime(1).getTime()) > 60000) 
-					vehicleCoordinate.setDate(resultSet.getDate(1));
+				if (prevTime != null) {
+					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 300000) {
+						vehicleCoordinate.setStat(2);
+					} 
+					if (isWait == true) {
+						prevVehicleCoordinate.setWaitTime(resultSet.getTime(1).getTime() - prevTime.getTime());
+						prevVehicleCoordinate.setStat(1);
+					}
+
+						if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
+								&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
+							isWait = true;
+						else {
+							isWait = false;
+							prevTime = resultSet.getTime(1);
+						}
+				} else {
+					prevTime = resultSet.getTime(1);
+					vehicleCoordinate.setDate(resultSet.getTime(1));
 					vehicleCoordinate.setTime(resultSet.getTime(1));
-				    prevDate = resultSet.getTime(1);
-				}else{
-					prevDate = resultSet.getTime(1);
 				}
-				vehicleCoordinate.setLongitude(resultSet.getDouble(2));
-				vehicleCoordinate.setLatitude(resultSet.getDouble(3));
-				coordinates.add(vehicleCoordinate);
+
+				if (isWait != true) {
+					vehicleCoordinate.setTime(resultSet.getTime(1));
+					vehicleCoordinate.setLongitude(resultSet.getDouble(2));
+					vehicleCoordinate.setLatitude(resultSet.getDouble(3));
+					prevVehicleCoordinate = vehicleCoordinate;
+					coordinates.add(vehicleCoordinate);
+				}
+
+				/*
+				 * VehicleCoordinate vehicleCoordinate = new
+				 * VehicleCoordinate();
+				 * System.out.println(resultSet.getTime(1)); if
+				 * (prevDate!=null){ System.out.println(prevDate.getTime() -
+				 * resultSet.getTime(1).getTime()); //if ((prevDate.getTime() -
+				 * resultSet.getTime(1).getTime()) > 60000)
+				 * vehicleCoordinate.setDate(resultSet.getDate(1));
+				 * vehicleCoordinate.setTime(resultSet.getTime(1)); prevDate =
+				 * resultSet.getTime(1); }else{ prevDate = resultSet.getTime(1);
+				 * } vehicleCoordinate.setLongitude(resultSet.getDouble(2));
+				 * vehicleCoordinate.setLatitude(resultSet.getDouble(3));
+				 * coordinates.add(vehicleCoordinate);
+				 */
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return coordinates;
+			for (VehicleCoordinate v : coordinates) {
+				System.out.println(v);
+			}
+		}catch(
+
+	Exception e)
+
+	{
+		e.printStackTrace();
+	} return coordinates;
+
 	}
 
 	@Override
@@ -240,8 +281,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 		if (codes == null)
 			return airLines;
 
-		try (Connection connection = dataSource.getConnection(); 
-			Statement statement = connection.createStatement();) {
+		try (Connection connection = dataSource.getConnection(); Statement statement = connection.createStatement();) {
 			String in = conversion(codes);
 
 			ResultSet resultSet = statement.executeQuery(
