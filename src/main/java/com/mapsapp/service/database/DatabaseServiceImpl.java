@@ -96,22 +96,15 @@ public class DatabaseServiceImpl implements DatabaseService {
 			ResultSet resultSet = statement.executeQuery("Select timestamp, x, y from position " 
 			+ " where (vehicle_id = " + in + ") and convert(varchar, timestamp, 104) = '"+
 					s + "' order by timestamp");
-		/*try (Connection connection = dataSource.getConnection();
-		     Statement statement = connection.createStatement();) 
-		{
-			String in = conversion(codes);
-			String s = dates.replace('-', '.');
-			ResultSet resultSet = statement.executeQuery("Select timestamp, x, y from position " 
-			+ " where (vehicle_id = " + in + ") and convert(varchar, timestamp, 104) = '" +
-					s + "' order by timestamp");*/
 			Time prevDate = null;
 			while (resultSet.next()) {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
 				System.out.println(resultSet.getTime(1));
 				if (prevDate!=null){
 					System.out.println(prevDate.getTime() - resultSet.getTime(1).getTime());
-					if ((prevDate.getTime() - resultSet.getTime(1).getTime()) > 60000) 
-						vehicleCoordinate.setDate(resultSet.getDate(1));
+					//if ((prevDate.getTime() - resultSet.getTime(1).getTime()) > 60000) 
+					vehicleCoordinate.setDate(resultSet.getDate(1));
+					vehicleCoordinate.setTime(resultSet.getTime(1));
 				    prevDate = resultSet.getTime(1);
 				}else{
 					prevDate = resultSet.getTime(1);

@@ -1,5 +1,6 @@
 package com.mapsapp.domain;
 
+import java.sql.Time;
 import java.util.Date;
 
 public class VehicleCoordinate {
@@ -8,6 +9,7 @@ public class VehicleCoordinate {
 	private double latitude;
 	private double longitude;	
 	private Date date;
+	private Time time;
 
 	public VehicleCoordinate(){
 	}
@@ -43,5 +45,12 @@ public class VehicleCoordinate {
 	public void setDate(Date date) {
 		this.date = date;
 	}
+	
+	public Date getTime() {
+		return time;
+	}
 
+	public void setTime(Time time) {
+		this.time = time;
+	}
 }

@@ -232,10 +232,10 @@ body {
 		
 		function get_way(){
 			mode=0;
-			drowWay();
+			drawWay();
 		}
 		
-		function drowWay(){
+		function drawWay(){
 			var prevLat, prevLng;
 			var lengthWay = 0;
 			removePointsOnWay();
@@ -253,8 +253,6 @@ body {
 				})
 				.done(function (data){
 					$.each(data, function (i, item){
-						//if (item.date)
-						//  $('#bel_energo_companies').append($('<option>', {text: item.date}));
 						coordinatesAllWay.push({lat: item.latitude, lng: item.longitude});
 					    if (prevLat && prevLng)	{
 						    lengthWay = lengthWay + latlng2distance(item.latitude, 
@@ -266,12 +264,6 @@ body {
 						    prevLng = item.longitude;
 					    }
 					   if (i%10 == 0){
-					    	/*var pointMarker = new google.maps.Marker({
-					    			position : {lat: item.latitude, lng: item.longitude},
-					    			map: map,
-					    			icon :  {url: "img/cluster/m1.png",
-						            	scaledSize: new google.maps.Size(20, 20)}
-					    	});*/
 					    	var circle = new google.maps.Circle({
 					    	      strokeColor: '#FF0000',
 					    	      strokeOpacity: 0.8,
@@ -280,9 +272,15 @@ body {
 					    	      fillOpacity: 0.35,
 					    	      center: {lat: item.latitude, lng: item.longitude},
 					    		  map : map,
-					    		  radius: 0.3
+					    		  radius: 10.93
 					    	});
-					    	//pointsOnWay.push(pointMarker);
+					    	pointsOnWay.push(circle);
+							var infoWindow = new google.maps.InfoWindow({
+								content : "<br>Марка : "+ item.date + " " + item.time
+								});
+					    	circle.addListener('click', function(){
+					    		infoWindow.setPosition(circle.getCenter());
+					    		infoWindow.open(map, circle);});
 					    }
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
@@ -373,7 +371,7 @@ body {
 						var uluru = {lat: item.lastPositionY, lng: item.lastPositionX};
 						
 						var markerPosition = new google.maps.LatLng(item.lastPositionY, item.lastPositionX);
-						markersBounds.extend(markerPosition); 
+						markersBounds.extend(markerPosition);
 				        var marker = new google.maps.Marker({
 				            position: uluru,
 				            map: map,
@@ -1009,7 +1007,7 @@ function YandexProjection() {
 
 			document.getElementById("zoom").innerHTML = "Увеличение: " + map.getZoom();
 			if (mode == 1){
-				drowWay();
+				drawWay();
 			}
 			if( map.getZoom() > main_zoom && !painted){
 
