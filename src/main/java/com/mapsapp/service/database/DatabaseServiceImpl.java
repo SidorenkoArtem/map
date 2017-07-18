@@ -103,31 +103,31 @@ public class DatabaseServiceImpl implements DatabaseService {
 			VehicleCoordinate prevVehicleCoordinate = null;
 			while (resultSet.next()) {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
+				vehicleCoordinate.setId(codes[0]);
 				if (prevTime != null) {
 					distance = Calculation.getDistance(prevVehicleCoordinate.getLatitude(), prevVehicleCoordinate.getLongitude(), 
 							resultSet.getDouble(3), resultSet.getDouble(2));
 					allDistance +=distance;
 					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 600000) {
-						vehicleCoordinate.setStat(2);
+						vehicleCoordinate.setStat(statusVehicle.DISCONNECT);
 					}
 					if (allDistance > 100){
-						vehicleCoordinate.setStat(3);
+						vehicleCoordinate.setStat(statusVehicle.SHOWPOINT);
 						vehicleCoordinate.setDistance((int)allDistance);
-						allDistance = 0;
-						
+						allDistance = 0;	
 					}
 					if (isWait == true) {
-						prevVehicleCoordinate.setWaitTime(resultSet.getTime(1).getTime() - prevTime.getTime());
-						prevVehicleCoordinate.setStat(1);
+						prevVehicleCoordinate.setWaitTime(resultSet.getTime(1).getTime() - prevVehicleCoordinate.getTime().getTime());
+						prevVehicleCoordinate.setStat(statusVehicle.WAIT);
 					}
 
 					if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
 							&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
 						isWait = true;
-					else {
-						isWait = false;
-						prevTime = resultSet.getTime(1);
-					}
+					else 
+					    isWait = false;
+					
+					prevTime = resultSet.getTime(1);
 				} else {
 					prevTime = resultSet.getTime(1);
 					vehicleCoordinate.setDate(resultSet.getTime(1));
@@ -141,29 +141,11 @@ public class DatabaseServiceImpl implements DatabaseService {
 					prevVehicleCoordinate = vehicleCoordinate;
 					coordinates.add(vehicleCoordinate);
 				}
-				/*
-				 * VehicleCoordinate vehicleCoordinate = new
-				 * VehicleCoordinate();
-				 * System.out.println(resultSet.getTime(1)); if
-				 * (prevDate!=null){ System.out.println(prevDate.getTime() -
-				 * resultSet.getTime(1).getTime()); //if ((prevDate.getTime() -
-				 * resultSet.getTime(1).getTime()) > 60000)
-				 * vehicleCoordinate.setDate(resultSet.getDate(1));
-				 * vehicleCoordinate.setTime(resultSet.getTime(1)); prevDate =
-				 * resultSet.getTime(1); }else{ prevDate = resultSet.getTime(1);
-				 * } vehicleCoordinate.setLongitude(resultSet.getDouble(2));
-				 * vehicleCoordinate.setLatitude(resultSet.getDouble(3));
-				 * coordinates.add(vehicleCoordinate);
-				 */
 			}
 			for (VehicleCoordinate v : coordinates) {
 				System.out.println(v);
 			}
-		} catch (
-
-		Exception e)
-
-		{
+		} catch (Exception e){
 			e.printStackTrace();
 		}
 		return coordinates;

@@ -11,7 +11,7 @@ public class VehicleCoordinate {
 	private Time time;
 	private long waitTime;
 	private boolean FirstPoint;
-	private int stat;
+	private statusVehicle stat;
 	private int distance;
 
 	public VehicleCoordinate(){
@@ -65,11 +65,11 @@ public class VehicleCoordinate {
 		FirstPoint = firstPoint;
 	}
 
-	public int getStat() {
+	public statusVehicle getStat() {
 		return stat;
 	}
 
-	public void setStat(int stat) {
+	public void setStat(statusVehicle stat) {
 		this.stat = stat;
 	}
 

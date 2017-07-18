@@ -169,6 +169,7 @@ body {
 		var coordinatesAllWay = [];
 		var pointsOnWay = [];
 		var flightPath;
+		var arrayForRoad = [];
         var markersBounds;
         
         
@@ -253,8 +254,32 @@ body {
 				})
 				.done(function (data){
 					$.each(data, function (i, item){
+						if (item.stat == "DISCONNECT" ){
+							var flightPathLocation = new google.maps.Polyline({
+								  path: coordinatesAllWay,
+								  geodesic: true,
+								  strokeColor: '#FF0000',
+								  strokeOpacity: 1.0,
+								  strokeWeight: 2,
+								  icons: masArrows,
+								  map: map
+							});
+							arrayForRoad.push(flightPathLocation);
+							//
+							var flightPathLocation1 = new google.maps.Polyline({
+								  path: [coordinatesAllWay[coordinatesAllWay.length-1], {lat: item.latitude, lng: item.longitude}],
+								  geodesic: true,
+								  strokeColor: '#FFFF00',
+								  strokeOpacity: 1.0,
+								  strokeWeight: 3,
+								  icons: masArrows,
+								  map: map
+							});
+							arrayForRoad.push(flightPathLocation1);
+							coordinatesAllWay = [];
+						}
 						coordinatesAllWay.push({lat: item.latitude, lng: item.longitude});
-						if (item.stat == 1 && map.getZoom() > 14){
+						if (item.stat == "WAIT" && map.getZoom() > 14){	
 							var marker = new google.maps.Marker({
 					            position: {lat: item.latitude, lng: item.longitude} ,
 					            map: map,
@@ -269,7 +294,7 @@ body {
 					    		infoWindow.open(map, marker);});
 							pointsOnWay.push(marker);
 						}
-						if (item.stat == 3 && map.getZoom() > 17){
+						if (item.stat == "SHOWPOINT" && map.getZoom() > 17){
 					    	var circle = new google.maps.Circle({
 					    	      strokeColor: '#FF0000',
 					    	      strokeOpacity: 0.8,
@@ -328,8 +353,6 @@ body {
 			                              offset: (100/(lengthWay/val)) * i + '%'};
 		            	  masArrows.push(s);
 		                }
-					    if (flightPath)
-					      flightPath.setMap(null);
 						flightPath = new google.maps.Polyline({
 							  path: coordinatesAllWay,
 							  geodesic: true,
@@ -339,6 +362,7 @@ body {
 							  icons: masArrows,
 							  map: map
 						});
+						arrayForRoad.push(flightPath)
 						mode = 1;
 					}
 				});
@@ -348,6 +372,9 @@ body {
 	    function removeWayVehicle(){
 			if (flightPath)
 			    flightPath.setMap(null);
+			for (i in arrayForRoad)
+				if (arrayForRoad[i])
+					arrayForRoad[i].setMap(null);
 	    }
 	    
 	    function removeVehicles(){
