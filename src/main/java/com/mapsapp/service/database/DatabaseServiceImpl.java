@@ -15,8 +15,8 @@ import java.util.List;
 public class DatabaseServiceImpl implements DatabaseService {
 	@Autowired
 	private DataSource dataSource;
-	@Autowired
-	private DataSource dataSource1;
+	//@Autowired
+	//private DataSource dataSource1;
 
 	@Override
 	public List<BelEnergoCompany> getAllBelEnergoCompanies() {
@@ -56,7 +56,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 					+ "last_position.y, vehicle.reg_number, vehicle.driver_name, vehicle.phone_number "
 					+ "from vehicle " + "left join last_position on (last_position.vehicle_id = vehicle.id) "
 					+ "where company_id =" + in + "Order by model");
-			double previousX, previousY;
+			//double previousX, previousY;
 			while (resultSet.next()) {
 				Vehicle vehicle = new Vehicle();
 				vehicle.setId(resultSet.getLong(1));
@@ -97,41 +97,50 @@ public class DatabaseServiceImpl implements DatabaseService {
 			ResultSet resultSet = statement
 					.executeQuery("Select timestamp, x, y from position " + " where (vehicle_id = " + in
 							+ ") and convert(varchar, timestamp, 104) = '" + s + "' order by timestamp");
-			// Time prevDate = null;
 			Time prevTime = null;
+			double allDistance = 0;
+			double distance;
 			VehicleCoordinate prevVehicleCoordinate = null;
 			while (resultSet.next()) {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
 				if (prevTime != null) {
-					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 300000) {
+					distance = Calculation.getDistance(prevVehicleCoordinate.getLatitude(), prevVehicleCoordinate.getLongitude(), 
+							resultSet.getDouble(3), resultSet.getDouble(2));
+					allDistance +=distance;
+					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 600000) {
 						vehicleCoordinate.setStat(2);
-					} 
+					}
+					if (allDistance > 100){
+						vehicleCoordinate.setStat(3);
+						vehicleCoordinate.setDistance((int)allDistance);
+						allDistance = 0;
+						
+					}
 					if (isWait == true) {
 						prevVehicleCoordinate.setWaitTime(resultSet.getTime(1).getTime() - prevTime.getTime());
 						prevVehicleCoordinate.setStat(1);
 					}
 
-						if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
-								&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
-							isWait = true;
-						else {
-							isWait = false;
-							prevTime = resultSet.getTime(1);
-						}
+					if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
+							&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
+						isWait = true;
+					else {
+						isWait = false;
+						prevTime = resultSet.getTime(1);
+					}
 				} else {
 					prevTime = resultSet.getTime(1);
 					vehicleCoordinate.setDate(resultSet.getTime(1));
 					vehicleCoordinate.setTime(resultSet.getTime(1));
 				}
-
 				if (isWait != true) {
+					vehicleCoordinate.setDate(resultSet.getDate(1));
 					vehicleCoordinate.setTime(resultSet.getTime(1));
 					vehicleCoordinate.setLongitude(resultSet.getDouble(2));
 					vehicleCoordinate.setLatitude(resultSet.getDouble(3));
 					prevVehicleCoordinate = vehicleCoordinate;
 					coordinates.add(vehicleCoordinate);
 				}
-
 				/*
 				 * VehicleCoordinate vehicleCoordinate = new
 				 * VehicleCoordinate();
@@ -150,13 +159,14 @@ public class DatabaseServiceImpl implements DatabaseService {
 			for (VehicleCoordinate v : coordinates) {
 				System.out.println(v);
 			}
-		}catch(
+		} catch (
 
-	Exception e)
+		Exception e)
 
-	{
-		e.printStackTrace();
-	} return coordinates;
+		{
+			e.printStackTrace();
+		}
+		return coordinates;
 
 	}
 

@@ -5,7 +5,6 @@ import java.util.Date;
 
 public class VehicleCoordinate {
 	private long id;
-	
 	private double latitude;
 	private double longitude;	
 	private Date date;
@@ -13,6 +12,7 @@ public class VehicleCoordinate {
 	private long waitTime;
 	private boolean FirstPoint;
 	private int stat;
+	private int distance;
 
 	public VehicleCoordinate(){
 	}
@@ -81,10 +81,19 @@ public class VehicleCoordinate {
 		this.waitTime = waitTime;
 	}
 
+	public int getDistance() {
+		return distance;
+	}
+
+	public void setDistance(int distance) {
+		this.distance = distance;
+	}
+
 	@Override
 	public String toString() {
 		return "VehicleCoordinate [id=" + id + ", latitude=" + latitude + ", longitude=" + longitude + ", date=" + date
-				+ ", time=" + time + ", waitTime=" + waitTime + ", FirstPoint=" + FirstPoint + ", stat=" + stat + "]";
+				+ ", time=" + time + ", waitTime=" + waitTime + ", FirstPoint=" + FirstPoint + ", stat=" + stat 
+				+ ", distance=" + distance +  "]";
 	}
 	
 }

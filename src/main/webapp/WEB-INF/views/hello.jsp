@@ -197,7 +197,7 @@ body {
 					});
 		}
 		get_bel_energo_companiess();
-		
+
 		$('#bel_energo_companies2').on("change", function () {
 			var codes = $('#bel_energo_companies2').val();
 			if (codes) {
@@ -254,16 +254,22 @@ body {
 				.done(function (data){
 					$.each(data, function (i, item){
 						coordinatesAllWay.push({lat: item.latitude, lng: item.longitude});
-					    if (prevLat && prevLng)	{
-						    lengthWay = lengthWay + latlng2distance(item.latitude, 
-								          item.longitude, prevLat, prevLng);
-						    prevLat = item.latitude;
-						    prevLng = item.longitude;
-					    }else{
-						    prevLat = item.latitude;
-						    prevLng = item.longitude;
-					    }
-					   if (i%10 == 0){
+						if (item.stat == 1 && map.getZoom() > 14){
+							var marker = new google.maps.Marker({
+					            position: {lat: item.latitude, lng: item.longitude} ,
+					            map: map,
+					            icon :  {url: "img/Wait.png",
+					            	scaledSize: new google.maps.Size(35, 50)}
+					          });
+							var infoWindow = new google.maps.InfoWindow({
+								content : "<br>Waiting : "+ item.waitTime * 0.001+ "sec." +
+								          "<br>Time : "+ item.time
+								});
+					    	marker.addListener('click', function(){
+					    		infoWindow.open(map, marker);});
+							pointsOnWay.push(marker);
+						}
+						if (item.stat == 3 && map.getZoom() > 17){
 					    	var circle = new google.maps.Circle({
 					    	      strokeColor: '#FF0000',
 					    	      strokeOpacity: 0.8,
@@ -272,15 +278,25 @@ body {
 					    	      fillOpacity: 0.35,
 					    	      center: {lat: item.latitude, lng: item.longitude},
 					    		  map : map,
-					    		  radius: 10.93
+					    		  radius: 1.0
 					    	});
 					    	pointsOnWay.push(circle);
 							var infoWindow = new google.maps.InfoWindow({
-								content : "<br>Марка : "+ item.date + " " + item.time
+								content : "<br>Date and time : "+ item.date + "/" + item.time +
+										  "<br>Distance to prev point : " + item.distance + "m."
 								});
 					    	circle.addListener('click', function(){
 					    		infoWindow.setPosition(circle.getCenter());
 					    		infoWindow.open(map, circle);});
+						}
+					    if (prevLat && prevLng)	{
+						    lengthWay = lengthWay + latlng2distance(item.latitude, 
+								          item.longitude, prevLat, prevLng);
+						    prevLat = item.latitude;
+						    prevLng = item.longitude;
+					    }else{
+						    prevLat = item.latitude;
+						    prevLng = item.longitude;
 					    }
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
@@ -309,7 +325,7 @@ body {
 		            	  var s = {icon: {
 			                              path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
 	                                     },
-			                              offset: (100/(lengthWay/val))*i + '%'};
+			                              offset: (100/(lengthWay/val)) * i + '%'};
 		            	  masArrows.push(s);
 		                }
 					    if (flightPath)
@@ -377,14 +393,12 @@ body {
 				            map: map,
 				            icon :  {url: "img/car.png",
 				            	scaledSize: new google.maps.Size(35, 50)}
-				          });
-				        markers.push(marker);// = marker;
+				        });
+				        markers.push(marker);
 				        marker.addListener('click', function(){infoWindow.open(map, marker);});
 				        markerVehiclesList.push(marker);
 					});
 					}
-				//var markerCluster = new MarkerClusterer(map, markers, {imagePath: "img/cluster/m"});
-
 				map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds)); 
 			});
 		}
