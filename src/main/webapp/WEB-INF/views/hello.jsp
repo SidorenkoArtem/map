@@ -171,6 +171,7 @@ body {
 		var flightPath;
 		var arrayForRoad = [];
         var markersBounds;
+        var id_vehicles;
         
         
         const is_zoom = [[8, 102400], [9, 51200], [10, 25600], [11, 12800], [12, 6400], 
@@ -246,15 +247,16 @@ body {
 			coordinatesAllWay = [];
 			var codes = $('#vehicles').val();
 			var date = document.getElementById('today1').value;
+			var lastDate = document.getElementById('today2').value;
 			if (codes) {
 				$.ajax({
 					url: "coordinatesVehicles",
 					method: "POST",
-					data: {code:  codes, date: date}
+					data: {code:  codes, date: date, lastDate: lastDate}
 				})
 				.done(function (data){
 					$.each(data, function (i, item){
-						if (item.stat == "DISCONNECT" ){
+						if (item.stat == "DISCONNECT"){
 							var flightPathLocation = new google.maps.Polyline({
 								  path: coordinatesAllWay,
 								  geodesic: true,
@@ -265,7 +267,6 @@ body {
 								  map: map
 							});
 							arrayForRoad.push(flightPathLocation);
-							//
 							var flightPathLocation1 = new google.maps.Polyline({
 								  path: [coordinatesAllWay[coordinatesAllWay.length-1], {lat: item.latitude, lng: item.longitude}],
 								  geodesic: true,
@@ -284,7 +285,7 @@ body {
 					            position: {lat: item.latitude, lng: item.longitude} ,
 					            map: map,
 					            icon :  {url: "img/Wait.png",
-					            	scaledSize: new google.maps.Size(35, 50)}
+					            	scaledSize: new google.maps.Size(20, 30)}
 					          });
 							var infoWindow = new google.maps.InfoWindow({
 								content : "<br>Waiting : "+ item.waitTime * 0.001+ "sec." +
@@ -326,12 +327,18 @@ body {
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
 					});
+					var infoWindow1 = new google.maps.InfoWindow({
+						content : "<br> Finish point"
+					});
+
 					var marker = new google.maps.Marker({
 			            position: coordinatesAllWay[coordinatesAllWay.length-1],
 			            map: map,
 			            icon :  {url: "img/car.png",
 			            	scaledSize: new google.maps.Size(35, 50)}
 			          });
+					marker.addListener('click', function(){
+			    		infoWindow1.open(map, marker);});
 					pointsOnWay.push(marker);
 					if (coordinatesAllWay.length != 0){
 						if (mode!=1)
@@ -447,8 +454,48 @@ body {
 				get_sectors(codes);
 			} 
 		});
-
-												// Участки
+		//показать машину
+		$('#vehicles').on("change", function(){
+			var code = $('#vehicles').val();
+			if (code){
+				getVehicle(code);
+			}
+		});
+		
+		function getVehicle(code){
+			mode = 0;
+			removePointsOnWay();
+			removeWayVehicle();
+			removeVehicles();
+			markersBounds = new google.maps.LatLngBounds();
+			$.ajax({url:"getVehicle", method: "POST", dataType:"json", contentType: 'application/json', mimeType: 'applicarion/json', data: "[" + code + "]"})
+					.done(function (data){
+						if (data){
+							$.each(data, function (i, item){
+								var infoWindow = new google.maps.InfoWindow({
+									content : "<br>Марка : " + item.name +
+											  "<br>Рег. номер : " + item.regNumber +
+									          "<br>Водитель : " + item.driverName +
+									          "<br>Номер телефона : " + item.phoneNumber
+									});
+								var marker = new google.maps.Marker({
+						            position: {lat: item.lastPositionY, lng: item.lastPositionX},
+						            map: map,
+						            icon :  {url: "img/car.png",
+						            	scaledSize: new google.maps.Size(35, 50)}
+						        });
+						        marker.addListener('click', function(){infoWindow.open(map, marker);});
+								markerVehiclesList.push(marker);
+								var markerPosition = new google.maps.LatLng(item.lastPositionY, item.lastPositionX);
+								markersBounds.extend(markerPosition);
+								
+							});
+							map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds)); 
+						}
+					});
+		}
+		
+		// Участки
 		function get_sectors(codes) {
 			$.ajax({url: "sectors", method: "POST", dataType: "json", contentType: 'application/json', mimeType: 'application/json', data: "[" + codes + "]"})
 					.done(function (data) {
