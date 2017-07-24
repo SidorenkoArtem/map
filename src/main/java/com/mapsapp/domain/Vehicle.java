@@ -85,4 +85,13 @@ public class Vehicle {
 	public void setDriverName(String driver_name) {
 		this.driverName = driver_name;
 	}
+
+	@Override
+	public String toString() {
+		return "Vehicle [id=" + id + ", company_id=" + company_id + ", name=" + name + ", model=" + model
+				+ ", regNumber=" + regNumber + ", driverName=" + driverName + ", phoneNumber=" + phoneNumber
+				+ ", lastPositionX=" + lastPositionX + ", lastPositionY=" + lastPositionY + "]";
+	}
+	
+	
 }
