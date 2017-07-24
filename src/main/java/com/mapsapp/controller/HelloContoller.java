@@ -2,7 +2,6 @@ package com.mapsapp.controller;
 
 import com.mapsapp.domain.*;
 import com.mapsapp.service.database.DatabaseService;
-import com.mapsapp.service.database.DatabaseServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -43,8 +42,15 @@ public class HelloContoller {
     @RequestMapping(value = "/coordinatesVehicles", method = RequestMethod.POST,
     		produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<VehicleCoordinate> getAllCoordinatesVihicle(@RequestParam("code") long[] codes, @RequestParam("date") String dates){
-     	return databaseService.getAllCoordinatesVihicle(codes, dates);
+    public List<VehicleCoordinate> getAllCoordinatesVihicle(@RequestParam("code") long[] codes, @RequestParam("date") String dates,
+    		@RequestParam("lastDate") String lastDate){
+     	return databaseService.getAllCoordinatesVihicle(codes, dates, lastDate);
+    }
+    
+    @RequestMapping(value = "/getVehicle", method = RequestMethod.POST)
+    @ResponseBody
+    public List<Vehicle> getVehicleByCode(@RequestBody long[] codes){
+    	return databaseService.getVehicleByCode(codes);
     }
     
     @RequestMapping(value = "/bel_energo_companies", method = RequestMethod.GET)
