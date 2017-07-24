@@ -15,8 +15,6 @@ import java.util.List;
 public class DatabaseServiceImpl implements DatabaseService {
 	@Autowired
 	private DataSource dataSource;
-	//@Autowired
-	//private DataSource dataSource1;
 
 	@Override
 	public List<BelEnergoCompany> getAllBelEnergoCompanies() {
@@ -56,7 +54,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 					+ "last_position.y, vehicle.reg_number, vehicle.driver_name, vehicle.phone_number "
 					+ "from vehicle " + "left join last_position on (last_position.vehicle_id = vehicle.id) "
 					+ "where company_id =" + in + "Order by model");
-			//double previousX, previousY;
 			while (resultSet.next()) {
 				Vehicle vehicle = new Vehicle();
 				vehicle.setId(resultSet.getLong(1));
@@ -81,7 +78,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 	}
 
 	@Override
-	public List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes, String dates) {
+	public List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes, String dates, String lastDate) {
 		List<VehicleCoordinate> coordinates = new ArrayList<>();
 		if (codes == null) {
 			return coordinates;
@@ -94,9 +91,11 @@ public class DatabaseServiceImpl implements DatabaseService {
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
 			String s = dates.replace('-', '.');
+			String lDate = lastDate.replace('-', '.');
 			ResultSet resultSet = statement
 					.executeQuery("Select timestamp, x, y from position " + " where (vehicle_id = " + in
-							+ ") and convert(varchar, timestamp, 104) = '" + s + "' order by timestamp");
+							+ ") and (convert(varchar, timestamp, 104) = '" + lDate + "'"
+							+ " or convert(varchar, timestamp, 104) = '" + s + "') order by timestamp");
 			Time prevTime = null;
 			double allDistance = 0;
 			double distance;
@@ -142,9 +141,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 					coordinates.add(vehicleCoordinate);
 				}
 			}
-			for (VehicleCoordinate v : coordinates) {
-				System.out.println(v);
-			}
 		} catch (Exception e){
 			e.printStackTrace();
 		}
@@ -152,6 +148,42 @@ public class DatabaseServiceImpl implements DatabaseService {
 
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public List<Vehicle> getVehicleByCode(long[] codes){
+		List<Vehicle> vehicles = new ArrayList<>();
+		if (codes == null)
+			return vehicles;
+		Vehicle vehicle = new Vehicle();
+		try{
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			Connection connect = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Statement statement = connect.createStatement();
+			String in = conversion(codes);
+			ResultSet resulteSet = statement.executeQuery("Select id, model, last_position.x, " +
+					"last_position.y, vehicle.reg_number, vehicle.driver_name, vehicle.phone_number " +
+					"from vehicle " +
+					"left join last_position on (last_position.vehicle_id = vehicle.id) " +
+					"where vehicle_id = " + in);
+			while(resulteSet.next()){
+				vehicle.setId(resulteSet.getLong(1));
+				vehicle.setName(resulteSet.getString(2));
+				vehicle.setLastPositionX(resulteSet.getFloat(3));
+				vehicle.setLastPositionY(resulteSet.getFloat(4));
+				vehicle.setRegNumber(resulteSet.getString(5));
+				vehicle.setDriverName(resulteSet.getString(6));
+				vehicle.setPhoneNumber(resulteSet.getString(7));
+				vehicles.add(vehicle);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		for(Vehicle in : vehicles){
+			System.out.println(in);
+		}
+		return vehicles;
+	}
+	
 	@Override
 	@Transactional(readOnly = true)
 	public List<BelEnergoCompany> getAllOrderedBelEnergoCompanies() {
