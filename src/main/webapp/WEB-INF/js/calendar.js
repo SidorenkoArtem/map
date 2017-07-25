@@ -168,12 +168,10 @@ prepcalendar:function( hd, cm, cy ){
 			vd.onmouseover=_Calendar.cs_over;
 			vd.onmouseout=_Calendar.cs_out;
 			vd.onclick=_Calendar.cs_click;
-
-			if (_Calendar.sccm == cm && _Calendar.sccd == (d-cd) && _Calendar.sccy == cy)
-			{ vd.style.color='#0F2345'; // сегодня
+			if (_Calendar.sccm == cm && _Calendar.sccd == (d-cd) && _Calendar.sccy == cy){ 
+			  vd.style.color='#0F2345'; // сегодня
 			  vd.style.fontWeight='900';
 			}	 
-			 
 			/*else if(dd.getDay()==6||dd.getDay()==0)
 				vd.style.color='#FF0000'; // выходной*/
 
