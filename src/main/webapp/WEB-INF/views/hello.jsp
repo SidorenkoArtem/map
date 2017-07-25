@@ -178,6 +178,7 @@ body {
                          [13,3200], [14, 1600], [15, 800], [16, 400], [17, 200], [18, 100], 
                          [19, 50], [20, 25]];
 		
+        const isZoomForCircle =[[15, 15],[16, 10],[17, 7],[18, 5],[19, 4],[20, 4]];
 		const Spans = [152,246,247, 3,248,249, 150,250,251, 151,252,253, 153,254,255  ,149,244];
 		const Pillars = [86,85,236,235,220];
 		const Pillar10 = 220;
@@ -245,6 +246,14 @@ body {
 			removeWayVehicle();
 			markersBounds = new google.maps.LatLngBounds();
 			coordinatesAllWay = [];
+			var rad;
+			var zoom = map.getZoom();
+			for(i=0; i<isZoomForCircle.length; i++){
+				if (zoom == isZoomForCircle[i][0]){
+					rad = isZoomForCircle[i][1];
+					break;
+				}
+			}
 			var codes = $('#vehicles').val();
 			var date = document.getElementById('today1').value;
 			var lastDate = document.getElementById('today2').value;
@@ -288,28 +297,29 @@ body {
 					            	scaledSize: new google.maps.Size(20, 30)}
 					          });
 							var infoWindow = new google.maps.InfoWindow({
-								content : "<br>Waiting : "+ item.waitTime * 0.001+ "sec." +
-								          "<br>Time : "+ item.time
+								content : "<br>Продолжительность остановки : "+ item.waitTime +
+								          "<br>Время : " + item.time
 								});
 					    	marker.addListener('click', function(){
 					    		infoWindow.open(map, marker);});
 							pointsOnWay.push(marker);
 						}
-						if (item.stat == "SHOWPOINT" && map.getZoom() > 17){
+						if (item.stat == "SHOWPOINT" && map.getZoom() > 15){
 					    	var circle = new google.maps.Circle({
-					    	      strokeColor: '#FF0000',
+					    	      strokeColor: '#602020',//602020  FF0000
 					    	      strokeOpacity: 0.8,
 					    	      strokeWeight: 2,
-					    	      fillColor: '#FF0000',
+					    	      fillColor: '#602020',
 					    	      fillOpacity: 0.35,
 					    	      center: {lat: item.latitude, lng: item.longitude},
 					    		  map : map,
-					    		  radius: 1.0
+					    		  radius: rad
 					    	});
 					    	pointsOnWay.push(circle);
 							var infoWindow = new google.maps.InfoWindow({
-								content : "<br>Date and time : "+ item.date + "/" + item.time +
-										  "<br>Distance to prev point : " + item.distance + "m."
+								content : "<br>Дата и время : "+ item.date + "/" + item.time +
+//										  "<br>Расстояние до предыдущей точки : " + item.distance + "м." +
+										  "<br>Средняя скорость : ~" +item.srSpeed + "км/ч"
 								});
 					    	circle.addListener('click', function(){
 					    		infoWindow.setPosition(circle.getCenter());
