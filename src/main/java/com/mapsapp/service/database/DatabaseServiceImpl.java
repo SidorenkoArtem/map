@@ -97,6 +97,7 @@ public class DatabaseServiceImpl implements DatabaseService {
 							+ ") and (convert(varchar, timestamp, 104) = '" + lDate + "'"
 							+ " or convert(varchar, timestamp, 104) = '" + s + "') order by timestamp");
 			Time prevTime = null;
+			double allTime = 0;
 			double allDistance = 0;
 			double distance;
 			VehicleCoordinate prevVehicleCoordinate = null;
@@ -104,32 +105,40 @@ public class DatabaseServiceImpl implements DatabaseService {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
 				vehicleCoordinate.setId(codes[0]);
 				if (prevTime != null) {
-					distance = Calculation.getDistance(prevVehicleCoordinate.getLatitude(), prevVehicleCoordinate.getLongitude(), 
-							resultSet.getDouble(3), resultSet.getDouble(2));
-					allDistance +=distance;
-					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 600000) {
-						vehicleCoordinate.setStat(statusVehicle.DISCONNECT);
-					}
-					if (allDistance > 100){
-						vehicleCoordinate.setStat(statusVehicle.SHOWPOINT);
-						vehicleCoordinate.setDistance((int)allDistance);
-						allDistance = 0;	
-					}
-					if (isWait == true) {
-						prevVehicleCoordinate.setWaitTime(resultSet.getTime(1).getTime() - prevVehicleCoordinate.getTime().getTime());
-						prevVehicleCoordinate.setStat(statusVehicle.WAIT);
-					}
-
 					if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
 							&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
 						isWait = true;
 					else 
 					    isWait = false;
+					distance = Calculation.getDistance(prevVehicleCoordinate.getLatitude(), prevVehicleCoordinate.getLongitude(), 
+							resultSet.getDouble(3), resultSet.getDouble(2));
+					allDistance += distance;
+					allTime += resultSet.getTime(1).getTime() - prevTime.getTime();
+					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 600000) {
+						vehicleCoordinate.setStat(statusVehicle.DISCONNECT);
+					}
+					/*if (allDistance > 100){
+						vehicleCoordinate.setStat(statusVehicle.SHOWPOINT);
+						vehicleCoordinate.setDistance((int)allDistance);
+						allDistance = 0;	
+					}*/
+					if (isWait == true) {
+						prevVehicleCoordinate.setWaitTime((resultSet.getTime(1).getTime() - prevVehicleCoordinate.getTime().getTime()));
+						prevVehicleCoordinate.setStat(statusVehicle.WAIT);
+					}
+					
+					if (allTime > 600000 && isWait != true){
+						vehicleCoordinate.setStat(statusVehicle.SHOWPOINT);
+						vehicleCoordinate.setDistance((int)allDistance);
+						vehicleCoordinate.setSrSpeed((int)(allDistance*3600/(allTime)));
+						allDistance = 0;
+						allTime = 0;
+					}
 					
 					prevTime = resultSet.getTime(1);
 				} else {
 					prevTime = resultSet.getTime(1);
-					vehicleCoordinate.setDate(resultSet.getTime(1));
+					vehicleCoordinate.setDate(resultSet.getDate(1));
 					vehicleCoordinate.setTime(resultSet.getTime(1));
 				}
 				if (isWait != true) {
