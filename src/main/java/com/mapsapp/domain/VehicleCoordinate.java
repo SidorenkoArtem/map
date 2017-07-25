@@ -1,18 +1,22 @@
 package com.mapsapp.domain;
 
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 public class VehicleCoordinate {
 	private long id;
 	private double latitude;
 	private double longitude;	
-	private Date date;
+	private String date;
 	private Time time;
-	private long waitTime;
+	private String waitTime;
 	private boolean FirstPoint;
 	private statusVehicle stat;
 	private int distance;
+	private int srSpeed;
 
 	public VehicleCoordinate(){
 	}
@@ -41,12 +45,23 @@ public class VehicleCoordinate {
 		this.longitude = longitude;
 	}
 
-	public Date getDate() {
+	public String getDate() {
 		return date;
 	}
 
 	public void setDate(Date date) {
-		this.date = date;
+		SimpleDateFormat oldDateFormat =new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+		SimpleDateFormat newDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
+		try {
+			String dateee = date.toString();
+			System.out.println(dateee);
+			date = oldDateFormat.parse(dateee);
+			System.out.println(date);
+			this.date = newDateFormat.format(date);
+			
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public Date getTime() {
@@ -73,12 +88,14 @@ public class VehicleCoordinate {
 		this.stat = stat;
 	}
 
-	public long getWaitTime() {
+	public String getWaitTime() {
 		return waitTime;
 	}
 
 	public void setWaitTime(long waitTime) {
-		this.waitTime = waitTime;
+		//long t = time.getTime();
+		//this.timeTemp = 
+		this.waitTime = String.format("%02d:%02d:%02d", waitTime / 1000 / 3600, waitTime / 1000 / 60 % 60, waitTime / 1000 % 60);
 	}
 
 	public int getDistance() {
@@ -87,6 +104,14 @@ public class VehicleCoordinate {
 
 	public void setDistance(int distance) {
 		this.distance = distance;
+	}
+
+	public int getSrSpeed() {
+		return srSpeed;
+	}
+
+	public void setSrSpeed(int srSpeed) {
+		this.srSpeed = srSpeed;
 	}
 
 	@Override
