@@ -15,15 +15,19 @@ import java.util.List;
 public class DatabaseServiceImpl implements DatabaseService {
 	@Autowired
 	private DataSource dataSource;
+	String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	String conn = "jdbc:sqlserver://localhost:1433;databaseName=gis_db";
+	String user = "sa";
+	String pass = "123";
 
 	@Override
 	public List<BelEnergoCompany> getAllBelEnergoCompanies() {
 		List<BelEnergoCompany> companies = new ArrayList<>();
 
 		try {
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
-					"sa", "123");
+			Class.forName(driver);
+			Connection connection = DriverManager.getConnection(conn,
+					user, pass);
 			Statement statement = connection.createStatement();
 			ResultSet resultSet = statement.executeQuery("Select id, name from company");
 			while (resultSet.next()) {
@@ -45,9 +49,9 @@ public class DatabaseServiceImpl implements DatabaseService {
 			return vehicles;
 
 		try {
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
-					"sa", "123");
+			Class.forName(driver);
+			Connection connection = DriverManager.getConnection(conn,
+					user, pass);
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
 			ResultSet resultSet = statement.executeQuery("Select id, model, last_position.x, "
@@ -64,13 +68,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 				vehicle.setDriverName(resultSet.getString(6));
 				vehicle.setPhoneNumber(resultSet.getString(7));
 				vehicles.add(vehicle);
-				/*
-				 * AirLine airLine = new AirLine();
-				 * airLine.setId(resultSet.getLong(1));
-				 * airLine.setId1(resultSet.getLong(1));
-				 * airLine.setName(resultSet.getString(2));
-				 * airLines.add(airLine);
-				 */
 			}
 		} catch (Exception e) {
 		}
@@ -85,9 +82,9 @@ public class DatabaseServiceImpl implements DatabaseService {
 		}
 		boolean isWait = false;
 		try {
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connection = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db",
-					"sa", "123");
+			Class.forName(driver);
+			Connection connection = DriverManager.getConnection(conn,
+					user, pass);
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
 			String s = dates.replace('-', '.');
@@ -117,11 +114,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 					if (resultSet.getTime(1).getTime() - prevTime.getTime() > 600000) {
 						vehicleCoordinate.setStat(statusVehicle.DISCONNECT);
 					}
-					/*if (allDistance > 100){
-						vehicleCoordinate.setStat(statusVehicle.SHOWPOINT);
-						vehicleCoordinate.setDistance((int)allDistance);
-						allDistance = 0;	
-					}*/
 					if (isWait == true) {
 						prevVehicleCoordinate.setWaitTime((resultSet.getTime(1).getTime() - prevVehicleCoordinate.getTime().getTime()));
 						prevVehicleCoordinate.setStat(statusVehicle.WAIT);
@@ -160,13 +152,12 @@ public class DatabaseServiceImpl implements DatabaseService {
 	@Override
 	@Transactional(readOnly = true)
 	public List<Integer> getDayWhenVehicleMove(String month, String year, long id){
-		System.out.println("Hello "+ month);
 		List<Integer> days = new ArrayList<>();
 		if (month == null || year == null)
 			return days;
 		try{
-			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			Connection connect = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Class.forName(driver);
+			Connection connect = DriverManager.getConnection(conn, user, pass);
 			Statement statement = connect.createStatement();
 			String idVehicle = String.valueOf(id);
 			if (Integer.parseInt(month) < 10)
@@ -182,8 +173,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		for(Integer i : days)
-			System.out.println(i);
 		return days;
 	}
 	
