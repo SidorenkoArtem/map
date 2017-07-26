@@ -161,10 +161,6 @@ prepcalendar:function( hd, cm, cy ){
 	var codes = $('#vehicles').val();
 	//$('#bel_energo_companies2').empty().append($('<option>', {value: "", text: "hello kitty" + cm +  +cy}));
 	//код
-	var days = [];
-
-	for (i in days)
-		$('#test').append($('<option>', { text: codes}));
 	for(var d=1;d<=42;d++)// цикл по всем ячейкам таблицы
 	{	d=parseInt(d);
 		vd=_Calendar.$ ( 'cv' + d );
