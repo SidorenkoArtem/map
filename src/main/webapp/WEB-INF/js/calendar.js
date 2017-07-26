@@ -158,6 +158,13 @@ prepcalendar:function( hd, cm, cy ){
 
 	marr=((cy%4)==0)?_Calendar.mnl:_Calendar.mnn;
 
+	var codes = $('#vehicles').val();
+	//$('#bel_energo_companies2').empty().append($('<option>', {value: "", text: "hello kitty" + cm +  +cy}));
+	//код
+	var days = [];
+
+	for (i in days)
+		$('#test').append($('<option>', { text: codes}));
 	for(var d=1;d<=42;d++)// цикл по всем ячейкам таблицы
 	{	d=parseInt(d);
 		vd=_Calendar.$ ( 'cv' + d );
@@ -189,6 +196,21 @@ prepcalendar:function( hd, cm, cy ){
 			vd.style.cursor='default';
 		}
 	}
+	$.ajax({
+		url: "daysWhenVehicleMove",
+		method: "POST",
+		data: {month:  cm + 1, year: cy, id: codes}
+	}).done(function(data){
+		$.each(data, function (i, item){
+			vd=_Calendar.$ ( 'cv' + (item + cd));
+			_Calendar.f_cps ( vd);
+			vd.style.color='#FF0000';
+			vd.innerHTML=item;
+
+			_Calendar.calvalarr[item]=_Calendar.addnull(item-cd,cm-(-1),cy);
+			$('#test').append($('<option>', { text: item}));
+		});
+	});
 },
 
 caddm:function(){

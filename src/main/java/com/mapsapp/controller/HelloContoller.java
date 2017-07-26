@@ -47,11 +47,20 @@ public class HelloContoller {
      	return databaseService.getAllCoordinatesVihicle(codes, dates, lastDate);
     }
     
+    @RequestMapping(value = "/daysWhenVehicleMove", method = RequestMethod.POST,
+    		produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Integer> getDayWhenVehicleMove(@RequestParam("month") String month, @RequestParam("year") String year, 
+    		@RequestParam("id") long id){
+    	return databaseService.getDayWhenVehicleMove(month, year, id);
+    }
+    
     @RequestMapping(value = "/getVehicle", method = RequestMethod.POST)
     @ResponseBody
     public List<Vehicle> getVehicleByCode(@RequestBody long[] codes){
     	return databaseService.getVehicleByCode(codes);
     }
+    
     
     @RequestMapping(value = "/bel_energo_companies", method = RequestMethod.GET)
     @ResponseBody

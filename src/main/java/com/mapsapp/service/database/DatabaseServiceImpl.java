@@ -159,6 +159,36 @@ public class DatabaseServiceImpl implements DatabaseService {
 
 	@Override
 	@Transactional(readOnly = true)
+	public List<Integer> getDayWhenVehicleMove(String month, String year, long id){
+		System.out.println("Hello "+ month);
+		List<Integer> days = new ArrayList<>();
+		if (month == null || year == null)
+			return days;
+		try{
+			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+			Connection connect = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName=gis_db", "sa", "123");
+			Statement statement = connect.createStatement();
+			String idVehicle = String.valueOf(id);
+			if (Integer.parseInt(month) < 10)
+				month = "0" + month;
+			ResultSet resulteSet = statement.executeQuery("Select DAY(date) " + 
+						"from stat " + 
+						"where status = 1 and date like '" + year + "-" + month + "-" + "%' and " +
+						"vehicle_id = " + idVehicle);
+			while(resulteSet.next()){
+				days.add(resulteSet.getInt(1));
+			}
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		for(Integer i : days)
+			System.out.println(i);
+		return days;
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
 	public List<Vehicle> getVehicleByCode(long[] codes){
 		List<Vehicle> vehicles = new ArrayList<>();
 		if (codes == null)

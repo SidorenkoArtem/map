@@ -9,6 +9,7 @@ public interface DatabaseService {
     List<BelEnergoCompany> getAllOrderedBelEnergoCompanies();
     //List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes);
     List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes, String dates, String lastDate);
+    List<Integer> getDayWhenVehicleMove(String month, String year, long id);
     List<Vehicle> getVehicleByCode(long[] codes);
     List<DistrictPowerStation> getDistrictPowerStationsByCodes(long[] codes);
     List<Sector> getSectorsByCodes(long[] codes);
