@@ -11,6 +11,7 @@ public interface DatabaseService {
     List<VehicleCoordinate> getAllCoordinatesVihicle(long[] codes, String dates, String lastDate);
     List<Integer> getDayWhenVehicleMove(String month, String year, long id);
     List<Vehicle> getVehicleByCode(long[] codes);
+    Vehicle getVehicleInformation(long id);
     List<DistrictPowerStation> getDistrictPowerStationsByCodes(long[] codes);
     List<Sector> getSectorsByCodes(long[] codes);
     List<AirLine10> getAirLines10ByCodes(long[] codes);

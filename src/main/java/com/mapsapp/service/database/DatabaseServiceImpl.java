@@ -87,25 +87,34 @@ public class DatabaseServiceImpl implements DatabaseService {
 					user, pass);
 			Statement statement = connection.createStatement();
 			String in = conversion(codes);
-			String s = dates.replace('-', '.');
-			String lDate = lastDate.replace('-', '.');
+			String firstDate = Calculation.getFormatDate(dates);
+			String secondDate = Calculation.getFormatDate(lastDate);
 			ResultSet resultSet = statement
-					.executeQuery("Select timestamp, x, y from position " + " where (vehicle_id = " + in
-							+ ") and (convert(varchar, timestamp, 104) = '" + lDate + "'"
-							+ " or convert(varchar, timestamp, 104) = '" + s + "') order by timestamp");
+					.executeQuery("select timestamp, x, y from position " + " where (vehicle_id =" + in + ") " +
+									"and (timestamp >= '" + firstDate + " 00:00:00.000') " +
+									"and (timestamp <= '" + secondDate + " 23:59:00.000') " +
+									"order by timestamp");
 			Time prevTime = null;
 			double allTime = 0;
 			double allDistance = 0;
 			double distance;
+		    Date prevDate = null;
 			VehicleCoordinate prevVehicleCoordinate = null;
 			while (resultSet.next()) {
 				VehicleCoordinate vehicleCoordinate = new VehicleCoordinate();
 				vehicleCoordinate.setId(codes[0]);
+				Date date = resultSet.getDate(1);
+				if (prevDate!=null && !prevDate.toString().equals(date.toString())){
+					prevVehicleCoordinate.setStat(statusVehicle.FINISHPOINT);
+					//prevVehicleCoordinate.setWaitTime((prevTime.getTime() - prevVehicleCoordinate.getTime().getTime()));
+					prevTime = null;
+					isWait=false;
+				}
 				if (prevTime != null) {
 					if (prevVehicleCoordinate.getLatitude() == resultSet.getDouble(3)
 							&& prevVehicleCoordinate.getLongitude() == resultSet.getDouble(2))
 						isWait = true;
-					else 
+					else
 					    isWait = false;
 					distance = Calculation.getDistance(prevVehicleCoordinate.getLatitude(), prevVehicleCoordinate.getLongitude(), 
 							resultSet.getDouble(3), resultSet.getDouble(2));
@@ -126,10 +135,11 @@ public class DatabaseServiceImpl implements DatabaseService {
 						allDistance = 0;
 						allTime = 0;
 					}
-					
 					prevTime = resultSet.getTime(1);
+					prevDate = resultSet.getDate(1);
 				} else {
 					prevTime = resultSet.getTime(1);
+					prevDate = resultSet.getDate(1);
 					vehicleCoordinate.setDate(resultSet.getDate(1));
 					vehicleCoordinate.setTime(resultSet.getTime(1));
 				}
@@ -145,10 +155,39 @@ public class DatabaseServiceImpl implements DatabaseService {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
+		for(VehicleCoordinate v : coordinates){
+			if (v.getStat() == statusVehicle.FINISHPOINT){
+				System.out.println(v);
+			}
+		}
 		return coordinates;
 
 	}
 
+	@Override
+	@Transactional(readOnly = true)
+	public Vehicle getVehicleInformation(long id){
+		Vehicle vehicle = new Vehicle();
+		try{
+			Class.forName(driver);
+			Connection connect = DriverManager.getConnection(conn, user, pass);
+			Statement statement = connect.createStatement();
+			String idVehicle = String.valueOf(id);
+			ResultSet resultSet = statement.executeQuery("Select " + 
+					"model, vehicle.reg_number, vehicle.driver_name, vehicle.phone_number " +
+					"from vehicle where id = " + idVehicle);
+			while(resultSet.next()){
+				vehicle.setModel(resultSet.getString(1));
+				vehicle.setRegNumber(resultSet.getString(2));
+				vehicle.setDriverName(resultSet.getString(3));
+				vehicle.setPhoneNumber(resultSet.getString(4));
+			}
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return vehicle;
+	}
+	
 	@Override
 	@Transactional(readOnly = true)
 	public List<Integer> getDayWhenVehicleMove(String month, String year, long id){
@@ -205,9 +244,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 			}
 		}catch (Exception e){
 			e.printStackTrace();
-		}
-		for(Vehicle in : vehicles){
-			System.out.println(in);
 		}
 		return vehicles;
 	}

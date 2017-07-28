@@ -66,7 +66,7 @@ body {
 			<br>
 			<br>
 
-			<h4 style1="text-align: center;">
+			<h4 onclick="removeAllVehiclesObjects()" style1="text-align: center;">
 				&nbsp; Карта электросетей <span
 					style="float: right; cursor: pointer;"
 					class="glyphicon glyphicon-erase" title="Очистить карту"></span>
@@ -178,7 +178,7 @@ body {
                          [13,3200], [14, 1600], [15, 800], [16, 400], [17, 200], [18, 100], 
                          [19, 50], [20, 25]];
 		
-        const isZoomForCircle =[[15, 15],[16, 10],[17, 6],[18, 4],[19, 3],[20, 3]];
+        const isZoomForCircle =[[13, 45],[14, 35],[15, 20],[16, 10],[17, 6],[18, 4],[19, 3],[20, 3]];
 		const Spans = [152,246,247, 3,248,249, 150,250,251, 151,252,253, 153,254,255  ,149,244];
 		const Pillars = [86,85,236,235,220];
 		const Pillar10 = 220;
@@ -297,16 +297,16 @@ body {
 					            	scaledSize: new google.maps.Size(20, 30)}
 					          });
 							var infoWindow = new google.maps.InfoWindow({
-								content : "<br>Продолжительность остановки : "+ item.waitTime +
-								          "<br>Время : " + item.time
+								content : "<br>Дата и время : " + item.date + "/" + item.time +
+								          "<br>Продолжительность остановки : "+ item.waitTime 
 								});
 					    	marker.addListener('click', function(){
 					    		infoWindow.open(map, marker);});
 							pointsOnWay.push(marker);
 						}
-						if (item.stat == "SHOWPOINT" && map.getZoom() > 15){
+						if (item.stat == "SHOWPOINT" && map.getZoom() >= 13){
 					    	var circle = new google.maps.Circle({
-					    	      strokeColor: '#602020',//602020  FF0000
+					    	      strokeColor: '#602020',
 					    	      strokeOpacity: 0.8,
 					    	      strokeWeight: 2,
 					    	      fillColor: '#602020',
@@ -314,7 +314,7 @@ body {
 					    	      center: {lat: item.latitude, lng: item.longitude},
 					    		  map : map,
 					    		  radius: rad
-					    	});
+					   });
 					    	pointsOnWay.push(circle);
 							var infoWindow = new google.maps.InfoWindow({
 								content : "<br>Дата и время : "+ item.date + "/" + item.time +
@@ -325,6 +325,22 @@ body {
 					    		infoWindow.setPosition(circle.getCenter());
 					    		infoWindow.open(map, circle);});
 						}
+					    if (item.stat == "FINISHPOINT"){
+							var infoWindow1 = new google.maps.InfoWindow({
+								content : "<br> Последняя точка : " +
+										  "<br>Дата : " + item.date
+							});
+							var marker = new google.maps.Marker({
+					            position: {lat: item.latitude, lng: item.longitude},
+					            map: map,
+					            icon :  {url: "img/car.png",
+					            	scaledSize: new google.maps.Size(35, 50)}
+					          });
+							marker.addListener('click', function(){
+					    		infoWindow1.open(map, marker);});
+							pointsOnWay.push(marker);
+					    	
+					    }
 					    if (prevLat && prevLng)	{
 						    lengthWay = lengthWay + latlng2distance(item.latitude, 
 								          item.longitude, prevLat, prevLng);
@@ -337,10 +353,18 @@ body {
 						var markerPosition = new google.maps.LatLng(item.latitude, item.longitude);
 						markersBounds.extend(markerPosition);
 					});
+					
+					$.ajax({
+						url : "blablabla",
+						method : "POST",
+						data : {idVehicle : codes} 
+					}).done(function(data){
 					var infoWindow1 = new google.maps.InfoWindow({
-						content : "<br> Finish point"
+						content : "<br> Модель : " + data.model +
+								  "<br> Рег. номер : " + data.regNumber +
+								  "<br> Водитель : " + data.driverName +
+								  "<br> Номер телефона : " + data.phoneNumber
 					});
-
 					var marker = new google.maps.Marker({
 			            position: coordinatesAllWay[coordinatesAllWay.length-1],
 			            map: map,
@@ -350,9 +374,13 @@ body {
 					marker.addListener('click', function(){
 			    		infoWindow1.open(map, marker);});
 					pointsOnWay.push(marker);
+					});
+					
 					if (coordinatesAllWay.length != 0){
-						if (mode!=1)
+						if (mode!=1){
 						  map.setCenter(markersBounds.getCenter(), map.fitBounds(markersBounds));
+						  removePointsOnWay();
+						}
 					    var zoom = map.getZoom();
 					    var val;
 					    for(i=0; i<is_zoom.length; i++){
@@ -361,7 +389,6 @@ body {
 						    	break;
 						    }
 					    }
-					    
 					    var masArrows = [];//
 		                for(i=0; i<lengthWay/val; i++){
 		            	  var s = {icon: {
@@ -384,6 +411,12 @@ body {
 					}
 				});
 			}
+		}
+		
+		function removeAllVehiclesObjects(){
+			removeWayVehicle();
+			removeVehicles();
+			removePointsOnWay();
 		}
 		
 	    function removeWayVehicle(){
@@ -410,7 +443,6 @@ body {
 		//
 		function get_vehicles(codes){
 			var markers = [];
-			var labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			mode = 0;
 			removePointsOnWay();
 			removeWayVehicle();
@@ -433,9 +465,9 @@ body {
 						var markerPosition = new google.maps.LatLng(item.lastPositionY, item.lastPositionX);
 						markersBounds.extend(markerPosition);
 				        var marker = new google.maps.Marker({
-				            position: uluru,
-				            map: map,
-				            icon :  {url: "img/car.png",
+				            position : uluru,
+				            map : map,
+				            icon :  {url : "img/car.png",
 				            	scaledSize: new google.maps.Size(35, 50)}
 				        });
 				        markers.push(marker);

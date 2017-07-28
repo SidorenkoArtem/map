@@ -1,5 +1,9 @@
 package com.mapsapp.domain;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class Calculation {
 	public static double getDistance(double latPrev, double lngPrev, double lat, double lng){
 		long r = 6372795;
@@ -23,5 +27,11 @@ public class Calculation {
         double dist = ad * r; //расстояние между двумя координатами в метрах
 		return dist;
 	}
-
+	
+	public static String getFormatDate(String date) throws ParseException{
+		SimpleDateFormat oldDateFormat = new SimpleDateFormat("dd-MM-yyyy");
+		SimpleDateFormat newDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date newDate = oldDateFormat.parse(date);
+		return newDateFormat.format(newDate);
+	}
 }

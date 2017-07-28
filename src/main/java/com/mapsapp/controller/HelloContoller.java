@@ -61,6 +61,12 @@ public class HelloContoller {
     	return databaseService.getVehicleByCode(codes);
     }
     
+    @RequestMapping(value = "/blablabla", method = RequestMethod.POST,
+    		produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Vehicle getVehicleInformation(@RequestParam("idVehicle") long idVehicle){
+    	return databaseService.getVehicleInformation(idVehicle);
+    }
     
     @RequestMapping(value = "/bel_energo_companies", method = RequestMethod.GET)
     @ResponseBody

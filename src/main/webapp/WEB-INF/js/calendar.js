@@ -78,9 +78,9 @@ lcs:function(ielem){/*сразу*/
     _Calendar.$('fc').style.top=_Calendar.Top(ielem)+ielem.offsetHeight+'px';
 	_Calendar.$('fc').style.display='';
 	_Calendar.$('fc').style.fontcolor='#2d6ca2';
-			_Calendar.$('fc').style.borderColor='#2d6ca2';
-			_Calendar.$('fc').style.borderStyle='solid';
-			_Calendar.$('fc').style.borderWidths='7 px';
+			//_Calendar.$('fc').style.borderColor='#2d6ca2';
+			//_Calendar.$('fc').style.borderStyle='solid';
+			//_Calendar.$('fc').style.borderWidths='7 px';
 			_Calendar.$('fc').style.zIndex='2';
 			_Calendar.$('fc').style.backgroundColor='#e6e6e6';//фон шапки
 	
@@ -112,7 +112,7 @@ evtTgt:function(e)
 EvtObj:function(e){if(!e)e=window.event;return e;},
 
 cs_over:function(e){/* меняет цвет того квадратика календаря к какому  подношу мышку*/
-	_Calendar.evtTgt(_Calendar.EvtObj(e)).style.background='#73B3D8';
+	_Calendar.evtTgt(_Calendar.EvtObj(e)).style.background='#8DB0E8';
 },
 
 cs_out:function(e){/* меняет цвет квадратиков календаря когда после того как подношу мышку  и оставляет такими*/
@@ -132,7 +132,9 @@ f_cps:function(obj){/* раскраска календаря*/
 	obj.style.color='#333333';/* цвет цифр календаря*/
 	obj.style.textAlign='center';/*выравнивание цифр*/
 	obj.style.textDecoration='none';
-	obj.style.border='1 px solid #606060';
+	obj.style.border='1px solid';
+	obj.style.borderColor='#FFFFFF';
+	obj.style.borderRadius='0';
 	obj.style.cursor='pointer';
 	obj.style.position='relative';
 	obj.style.zIndex='2';
@@ -161,6 +163,10 @@ prepcalendar:function( hd, cm, cy ){
 	var codes = $('#vehicles').val();
 	//$('#bel_energo_companies2').empty().append($('<option>', {value: "", text: "hello kitty" + cm +  +cy}));
 	//код
+	var days = [];
+
+	for (i in days)
+		$('#test').append($('<option>', { text: codes}));
 	for(var d=1;d<=42;d++)// цикл по всем ячейкам таблицы
 	{	d=parseInt(d);
 		vd=_Calendar.$ ( 'cv' + d );
@@ -174,7 +180,9 @@ prepcalendar:function( hd, cm, cy ){
 			if (_Calendar.sccm == cm && _Calendar.sccd == (d-cd) && _Calendar.sccy == cy){ 
 			  vd.style.color='#0F2345'; // сегодня
 			  vd.style.fontWeight='900';
-			}	 
+			  vd.style.fontStyle='oblique';
+			 
+			 }	 
 			/*else if(dd.getDay()==6||dd.getDay()==0)
 				vd.style.color='#FF0000'; // выходной*/
 
@@ -199,10 +207,15 @@ prepcalendar:function( hd, cm, cy ){
 	}).done(function(data){
 		$.each(data, function (i, item){
 			vd=_Calendar.$ ( 'cv' + (item + cd));
-			_Calendar.f_cps ( vd);
-			vd.style.color='#FF0000';
+			_Calendar.f_cps ( vd);{
+			vd.style.color='#31B404';
+			vd.style.fontWeight='bold';
+			
+			vd.style.border='1px outset';
+			vd.style.borderRadius='10px';
+			vd.style.borderColor='#E4E4E4';
 			vd.innerHTML=item;
-
+			}
 			_Calendar.calvalarr[item]=_Calendar.addnull(item-cd,cm-(-1),cy);
 			$('#test').append($('<option>', { text: item}));
 		});
