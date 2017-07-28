@@ -155,11 +155,6 @@ public class DatabaseServiceImpl implements DatabaseService {
 		} catch (Exception e){
 			e.printStackTrace();
 		}
-		for(VehicleCoordinate v : coordinates){
-			if (v.getStat() == statusVehicle.FINISHPOINT){
-				System.out.println(v);
-			}
-		}
 		return coordinates;
 
 	}

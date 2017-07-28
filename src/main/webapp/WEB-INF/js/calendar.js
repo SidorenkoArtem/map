@@ -181,6 +181,8 @@ prepcalendar:function( hd, cm, cy ){
 			  vd.style.color='#0F2345'; // сегодня
 			  vd.style.fontWeight='900';
 			  vd.style.fontStyle='oblique';
+			  vd.style.border='1px dotted';
+			  vd.style.borderColor='#577093'
 			 
 			 }	 
 			/*else if(dd.getDay()==6||dd.getDay()==0)

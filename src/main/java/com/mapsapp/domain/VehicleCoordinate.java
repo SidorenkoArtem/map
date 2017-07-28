@@ -54,9 +54,9 @@ public class VehicleCoordinate {
 		SimpleDateFormat newDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault());
 		try {
 			String dateee = date.toString();
-			System.out.println(dateee);
+			//System.out.println(dateee);
 			date = oldDateFormat.parse(dateee);
-			System.out.println(date);
+			//System.out.println(date);
 			this.date = newDateFormat.format(date);
 			
 		} catch (ParseException e) {
